@@ -15,12 +15,11 @@
         }
         .main-layout { display: flex; gap: 25px; width: 95%; max-width: 1400px; height: 85vh; align-items: flex-start; }
         
-        /* 控制面板優化：增加內部滾動與彈性 */
         .control-panel { 
             flex: 0 0 320px; display: flex; flex-direction: column; gap: 15px; height: 100%; 
-            overflow-y: auto; scrollbar-width: none; /* Firefox */
+            overflow-y: auto; scrollbar-width: none;
         }
-        .control-panel::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
+        .control-panel::-webkit-scrollbar { display: none; }
 
         .glass { 
             background: rgba(30, 30, 30, 0.6); backdrop-filter: blur(15px); border-radius: 20px; 
@@ -48,7 +47,6 @@
         .runner-emoji { font-size: 28px; animation: bounce linear infinite alternate; }
         @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
         
-        /* BMI 標籤樣式 */
         .bmi-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold; border: 1px solid; vertical-align: middle; }
         .tag-lose { background: rgba(230, 126, 34, 0.2); color: #e67e22; border-color: #e67e22; }
         .tag-gain { background: rgba(52, 152, 219, 0.2); color: #3498db; border-color: #3498db; }
@@ -74,6 +72,7 @@
                 <div style="font-size: 12px; font-weight: bold; margin-top: 5px;">2026Y ASGARD 挑戰賽獎金</div>
                 <div style="font-size: 32px; font-weight: 900;" id="totalPrize">NT$ 0</div>
             </div>
+            <div id="periodDisplay" style="text-align:center; padding: 8px; font-size: 11px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6);">期間：未設定 ~ 2026-04-13</div>
             <div id="ddayDisplay" style="text-align:center; padding: 12px; background: rgba(0,0,0,0.5); color: var(--gold); font-weight: bold; font-family: monospace; font-size: 18px;">00D 00:00:00</div>
         </div>
 
@@ -89,6 +88,9 @@
                         <option value="22">目標 BMI 22</option>
                         <option value="20">目標 BMI 20</option>
                     </select>
+                    <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 12px; padding: 0 5px; line-height: 1.4;">
+                        * 進度計算：依據 (身高/100)² × 目標 BMI 換算目標體重，並計算當前達成率。
+                    </div>
                     <input type="password" id="r_acc" placeholder="設定更新密碼">
                     <button style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doRegister()">確認報名</button>
                 </div>
@@ -150,6 +152,8 @@
             period = content.period || { start: "", end: "2026-04-13" };
             renderList();
             updateCountdown();
+            // 修正：更新頁面上的賽期顯示
+            document.getElementById('periodDisplay').innerText = `期間：${period.start || '未設定'} ~ ${period.end}`;
             if(localStorage.getItem('admin_auth') === 'true') renderAdminList();
         } catch (e) { console.error("同步失敗"); }
     }
@@ -208,20 +212,11 @@
         `).join('');
     }
 
-    // --- 選單互斥邏輯修正 ---
     function toggleMenu(id) {
         const target = document.getElementById(id);
         const isOpen = target.classList.contains('active');
-        
-        // 先關閉所有選單
-        document.querySelectorAll('.menu-content').forEach(el => {
-            el.classList.remove('active');
-        });
-        
-        // 如果原本是關閉的，就打開它
-        if (!isOpen) {
-            target.classList.add('active');
-        }
+        document.querySelectorAll('.menu-content').forEach(el => el.classList.remove('active'));
+        if (!isOpen) target.classList.add('active');
     }
 
     function doAdminLogin() {
