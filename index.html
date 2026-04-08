@@ -8,6 +8,12 @@
     <style>
         :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #eee; --success: #27ae60; }
         
+        /* 核心修正：設定 HTML 背景底色，防止拉動回彈時出現白邊 */
+        html {
+            background-color: #0d1117; 
+            overscroll-behavior-y: none; /* 額外選項：禁止 iOS/Chrome 的橡皮筋回彈效果 */
+        }
+
         body { 
             font-family: 'PingFang TC', sans-serif; margin: 0; 
             background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('jpg.jpeg'); 
@@ -88,8 +94,10 @@
         .p-fill { height: 100%; border-radius: 6px; transition: width 1s ease-in-out; position: absolute; }
         
         .runner-box { position: absolute; top: -40px; transform: translateX(-50%); transition: left 1s; display: flex; flex-direction: column; align-items: center; }
-        .runner-emoji { font-size: 26px; animation: bounce linear infinite alternate; }
-        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+        
+        /* 修正：將跑步小人翻轉至向右奔跑 */
+        .runner-emoji { font-size: 26px; animation: bounce linear infinite alternate; transform: scaleX(-1); }
+        @keyframes bounce { from { transform: translateY(0) scaleX(-1); } to { transform: translateY(-8px) scaleX(-1); } }
         
         .bmi-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold; border: 1px solid; }
         .tag-lose { background: rgba(230, 126, 34, 0.2); color: #e67e22; border-color: #e67e22; }
@@ -172,6 +180,7 @@
 </div>
 
 <script>
+    // 配置資訊保持不變
     const CONFIG = {
         token: 'ghp_PIaGwuMrdhwpay' + 'dtVR10V8a8jJYP141vWzNj', 
         owner: 'HBY0413', repo: 'weight-loss-contest', path: 'data.json'
@@ -191,7 +200,6 @@
             fileSha = data.sha;
             const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
             
-            // 紀錄舊排名
             const currentSorted = [...players].sort((a, b) => b.progress - a.progress);
             prevRankMap = {};
             currentSorted.forEach((p, index) => { prevRankMap[p.name] = index + 1; });
@@ -348,8 +356,6 @@
             await syncFromGitHub();
             if(players.some(p => p.name === name)) throw new Error("該姓名已存在，請使用其他名稱");
             
-            // 計算初始進度
-            const targetW = tbmi * ((h/100)*(h/100));
             players.push({ name, h, sw, cw: sw, tbmi, acc, progress: 0, lastUpdate: new Date().toLocaleString() });
             
             await pushToGitHub();
@@ -382,7 +388,6 @@
             const currentGap = Math.abs(w - targetW);
             const isLosing = p.sw > targetW; 
             
-            // 核心邏輯：越相符分數越高，達標或超越即 100%
             const reachedTarget = isLosing ? (w <= targetW) : (w >= targetW);
             
             if (reachedTarget) {
@@ -403,7 +408,7 @@
 
     window.onload = () => {
         syncFromGitHub();
-        setInterval(syncFromGitHub, 30000); // 改為 30 秒自動更新
+        setInterval(syncFromGitHub, 30000);
         setInterval(updateCountdown, 1000);
         if(localStorage.getItem('admin_auth') === 'true') showAdminUI();
     };
