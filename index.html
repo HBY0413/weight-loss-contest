@@ -1,127 +1,54 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026Y ASGARD 體態變革者挑戰賽</title>
-    <style>
-        :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #eee; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; }
-        body { 
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
-            margin: 0; 
-            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('jpg.jpeg'); 
-            background-size: cover; background-attachment: fixed; background-position: center;
-            min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; color: var(--text);
-        }
-        
-        /* 修正點：調整佈局與寬度，防止選單被切到 */
-        .main-layout { display: flex; gap: 20px; width: 98%; max-width: 1300px; height: 90vh; align-items: flex-start; padding: 0 10px; }
-        .control-panel { flex: 0 0 320px; display: flex; flex-direction: column; gap: 15px; max-height: 100%; overflow-y: auto; padding-bottom: 20px; }
-        
-        .glass, .rank-card { 
-            background: linear-gradient(135deg, rgba(20, 20, 20, 0.4), rgba(40, 40, 40, 0.4)) !important; 
-            backdrop-filter: blur(15px); border-radius: 20px; overflow: hidden; 
-            border: 1px solid rgba(255,255,255,0.1) !important; box-shadow: 0 10px 30px rgba(0,0,0,0.6); 
-        }
-
-        .treasure-header { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; padding: 20px 15px; text-align: center; }
-        .timer-box { background: rgba(0, 0, 0, 0.7); color: #f1c40f; padding: 12px; font-size: 16px; text-align: center; font-weight: bold; }
-        
-        .menu-item { border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .menu-trigger { 
-            width: 100%; padding: 15px 20px; background: transparent; border: none; 
-            text-align: left; font-size: 15px; font-weight: bold; cursor: pointer; 
-            display: flex; justify-content: space-between; color: #fff;
-        }
-        .menu-content { max-height: 0; overflow: hidden; transition: max-height 0.4s; background: rgba(0,0,0,0.3); }
-        .menu-content.active { max-height: 1000px; padding: 15px; }
-
-        input, select { 
-            width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.1); 
-            border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: #fff; box-sizing: border-box; font-size: 14px;
-        }
-        input::placeholder { color: rgba(255,255,255,0.5); }
-        select option { background: #333; color: #fff; }
-        .btn-submit { width: 100%; padding: 12px; background: var(--primary); color: white; border-radius: 10px; font-weight: bold; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
-
-        .rank-display { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
-        .rank-card { padding: 20px; display: flex; align-items: center; gap: 15px; position: relative; min-height: 100px; margin-right: 5px; }
-        .p-info { flex: 0 0 140px; }
-        .bmi-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 5px; vertical-align: middle; font-weight: bold; }
-        .tag-lose { background: rgba(230, 126, 34, 0.3); color: #e67e22; border: 1px solid #e67e22; }
-        .tag-gain { background: rgba(52, 152, 219, 0.3); color: #3498db; border: 1px solid #3498db; }
-        .target-bmi-label { position: absolute; right: 25px; top: 35px; font-size: 11px; color: var(--gold); font-weight: bold; }
-
-        .p-track { flex: 1; position: relative; height: 10px; background: rgba(255, 255, 255, 0.1); border-radius: 6px; margin-top: 40px; }
-        .p-fill { height: 100%; border-radius: 6px; transition: width 1s ease-in-out; position: absolute; }
-        .runner-box { position: absolute; top: -50px; transition: left 1s ease-in-out; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
-        .runner-emoji { font-size: 24px; transform: scaleX(-1); animation: bounce 0.4s infinite alternate linear; }
-        @keyframes bounce { from { transform: scaleX(-1) translateY(0); } to { transform: scaleX(-1) translateY(-6px); } }
-        .runner-percent { font-size: 10px; font-weight: bold; background: rgba(0,0,0,0.7); color: #fff; padding: 2px 6px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); }
-    </style>
-</head>
-<body>
-
-<audio id="bgMusic" loop><source src="bgm.mp3" type="audio/mpeg"></audio>
-
-<div class="main-layout">
-    <div class="control-panel">
-        <div class="glass" style="padding: 12px; cursor: pointer;" onclick="toggleMusic()">
-            <span id="musicToggle">🔇</span> <span style="font-size: 13px; font-weight: bold;">點擊開啟背景音樂</span>
+<div class="menu-item">
+    <button class="menu-trigger" onclick="toggleMenu('adminForm')">🔑 管理者設定 <span>+</span></button>
+    <div id="adminForm" class="menu-content">
+        <div id="admin_auth_zone">
+            <input type="password" id="admin_key" placeholder="輸入管理者密鑰">
+            <button class="btn-submit" style="background:var(--accent);" onclick="verifyAdmin()">驗證權限</button>
         </div>
-
-        <div class="glass">
-            <div class="treasure-header">
-                <div id="moneyBag" style="font-size: 40px; cursor: pointer;">💰</div>
-                <div style="font-size: 12px; font-weight: bold;">2026Y ASGARD 體態變革者挑戰賽</div>
-                <div style="font-size: 32px; font-weight: 900;" id="totalPrize">載入中...</div>
-            </div>
-            <div class="timer-box" id="ddayDisplay">00D 00:00:00</div>
-            <div id="periodDisplay" style="font-size: 11px; text-align: center; padding: 8px; background: rgba(0,0,0,0.2);">同步中...</div>
-        </div>
-
-        <div class="glass">
-            <div class="menu-item">
-                <button class="menu-trigger" onclick="toggleMenu('regForm')">🏃 我要報名參賽 <span>+</span></button>
-                <div id="regForm" class="menu-content">
-                    <input type="text" id="r_name" placeholder="姓名">
-                    <input type="number" id="r_h" placeholder="身高(cm)">
-                    <input type="number" id="r_w" placeholder="初始體重(kg)">
-                    <select id="r_target_bmi">
-                        <option value="24">目標 BMI 24</option>
-                        <option value="22">目標 BMI 22</option>
-                        <option value="20">目標 BMI 20</option>
-                    </select>
-                    <input type="password" id="r_acc" placeholder="設定密碼">
-                    <button class="btn-submit" onclick="doRegister()">確認報名</button>
-                </div>
-            </div>
-            <div class="menu-item">
-                <button class="menu-trigger" onclick="toggleMenu('updForm')">⚖️ 更新體重紀錄 <span>+</span></button>
-                <div id="updForm" class="menu-content">
-                    <input type="text" id="u_name" placeholder="姓名">
-                    <input type="password" id="u_acc" placeholder="輸入密碼">
-                    <input type="number" id="u_w" placeholder="今日體重(kg)">
-                    <button class="btn-submit" style="background:var(--success);" onclick="doUpdate()">同步數據</button>
-                </div>
-            </div>
-            <div class="menu-item">
-                <button class="menu-trigger" onclick="toggleMenu('adminForm')">🔑 管理者設定 <span>+</span></button>
-                <div id="adminForm" class="menu-content">
-                    <input type="password" id="admin_key" placeholder="管理者密鑰">
-                    <input type="date" id="start_date">
-                    <input type="date" id="end_date">
-                    <button class="btn-submit" style="background:var(--warning);" onclick="doAdminSync()">更新比賽期間</button>
-                </div>
-            </div>
+        
+        <div id="admin_setting_zone" style="display: none; border-top: 1px dashed rgba(255,255,255,0.2); padding-top: 15px;">
+            <div style="font-size: 12px; color: var(--gold); margin-bottom: 10px;">✅ 驗證成功，請設定比賽區間：</div>
+            <label style="font-size: 11px; color: rgba(255,255,255,0.6);">開始日期</label>
+            <input type="date" id="start_date">
+            <label style="font-size: 11px; color: rgba(255,255,255,0.6);">結束日期</label>
+            <input type="date" id="end_date">
+            <button class="btn-submit" style="background:var(--warning);" onclick="doAdminSync()">同步至 GitHub</button>
         </div>
     </div>
-    <div id="rankContainer" class="rank-display"></div>
 </div>
 
 <script>
-    // 這裡請接上你原本完整的 CONFIG 與 JavaScript 邏輯，包含 syncFromGitHub 等函數
-    // 記得 window.onload 裡面要呼叫 syncFromGitHub() 
+    // 專屬於管理者選單的邏輯控制
+    function verifyAdmin() {
+        const key = document.getElementById('admin_key').value;
+        // 這裡可以放入你的預設密鑰，或單純檢查是否為空
+        if (key === "YOUR_PASSWORD") { 
+            document.getElementById('admin_auth_zone').style.display = 'none';
+            document.getElementById('admin_setting_zone').style.display = 'block';
+        } else {
+            alert("密鑰錯誤，請重新輸入");
+            document.getElementById('admin_key').value = "";
+        }
+    }
+
+    // 重新展開選單時，重置管理者狀態（選用）
+    function toggleMenu(id) {
+        const target = document.getElementById(id);
+        const isOpen = target.classList.contains('active');
+        document.querySelectorAll('.menu-content').forEach(el => { 
+            el.classList.remove('active'); 
+            el.style.maxHeight = "0"; 
+        });
+        
+        if (!isOpen) { 
+            target.classList.add('active'); 
+            target.style.maxHeight = "1000px";
+            // 如果是管理者選單，重置回密碼輸入畫面
+            if(id === 'adminForm') {
+                document.getElementById('admin_auth_zone').style.display = 'block';
+                document.getElementById('admin_setting_zone').style.display = 'none';
+                document.getElementById('admin_key').value = "";
+            }
+        }
+    }
 </script>
-</body>
-</html>
