@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 減肥戰士 - 數據同步版</title>
+    <title>2026 減肥戰士 - 雲端同步版</title>
     <style>
         :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #333; --success: #27ae60; --danger: #e74c3c; --track: #edf2f7; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; margin: 0; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=2000'); background-size: cover; background-attachment: fixed; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
@@ -115,7 +115,7 @@
         const statusEl = document.getElementById('syncStatus');
         statusEl.innerText = "☁️ 正在從雲端同步...";
         try {
-            // 修正重點：移除 headers 裡的 "Cache-Control"，解決 CORS 預檢請求失敗問題
+            // 核心修正：移除 headers 中的 cache-control，解決 CORS 報錯問題
             const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
                 headers: { 
                     "Authorization": `token ${CONFIG.token}`
@@ -123,7 +123,7 @@
             });
             
             if (res.status === 401) {
-                statusEl.innerText = "❌ Token 驗證失敗 (401)，請重新確認 Token 是否被註銷";
+                statusEl.innerText = "❌ Token 驗證失敗 (401)，請確認 Token 未被註銷";
                 return;
             }
             if (!res.ok) throw new Error('連線失敗');
@@ -139,12 +139,12 @@
             statusEl.innerText = `✅ 最後同步: ${new Date().toLocaleTimeString()}`;
         } catch (e) {
             console.error(e);
-            statusEl.innerText = "❌ 同步失敗，請按 F12 打開 Console 檢查報錯內容";
+            statusEl.innerText = "❌ 同步失敗，請點 F12 檢查 Console 報錯";
         }
     }
 
     async function pushToGitHub() {
-        document.getElementById('syncStatus').innerText = "📤 正在更新資料庫...";
+        document.getElementById('syncStatus').innerText = "📤 正在儲存至雲端...";
         const content = btoa(unescape(encodeURIComponent(JSON.stringify({ players, period }))));
         try {
             const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
@@ -160,10 +160,10 @@
             
             const result = await res.json();
             fileSha = result.content.sha;
-            document.getElementById('syncStatus').innerText = "✅ 資料已同步至雲端";
+            document.getElementById('syncStatus').innerText = "✅ 資料已同步成功";
             render();
         } catch (e) {
-            alert("上傳失敗，請確認你的 Token 具備 'repo' 權限");
+            alert("上傳失敗，請確認 Token 具備 repo 權限");
         }
     }
 
@@ -181,16 +181,16 @@
             const now = new Date(); now.setHours(0,0,0,0);
             const start = new Date(period.start); const end = new Date(period.end);
             if(now < start) dDisp.innerText = `距開賽還有 ${Math.ceil((start-now)/(86400000))} 天`;
-            else if(now <= end) dDisp.innerText = `比賽進行中：剩餘 ${Math.ceil((end-now)/(86400000))} 天`;
-            else dDisp.innerText = "賽事已圓滿結束";
+            else if(now <= end) dDisp.innerText = `剩餘賽程：${Math.ceil((end-now)/(86400000))} 天`;
+            else dDisp.innerText = "本期賽事已結束";
         } else {
-            pDisp.innerText = "尚未設定賽事日期";
-            dDisp.innerText = "等待管理者發布賽期";
+            pDisp.innerText = "賽期未設定";
+            dDisp.innerText = "等待管理者發布";
         }
 
         const container = document.getElementById('rankContainer');
         const sorted = [...players].sort((a,b) => b.progress - a.progress);
-        container.innerHTML = sorted.length ? '' : '<div class="glass" style="padding:40px; text-align:center;">目前尚無參賽戰士</div>';
+        container.innerHTML = sorted.length ? '' : '<div class="glass" style="padding:40px; text-align:center;">目前尚無參賽戰士數據</div>';
         sorted.forEach((p, i) => {
             const barW = Math.min(Math.max(p.progress, 0), 100);
             container.innerHTML += `
@@ -214,7 +214,7 @@
         const h = parseFloat(document.getElementById('r_h').value);
         const w = parseFloat(document.getElementById('r_w').value);
         const acc = document.getElementById('r_acc').value;
-        if(!name || !h || !w || !acc) return alert("資料不完整");
+        if(!name || !h || !w || !acc) return alert("請填寫完整資訊");
         const targetW = Math.round(((h/100)**2 * 24) * 10) / 10;
         players.push({ name, h, sw: w, cw: w, tbmi: 24, target: targetW, acc, progress: 0 });
         pushToGitHub();
@@ -226,7 +226,7 @@
         const acc = document.getElementById('u_acc').value;
         const w = parseFloat(document.getElementById('u_w').value);
         const p = players.find(x => x.name === name && x.acc === acc);
-        if(!p) return alert("姓名或密碼不正確");
+        if(!p) return alert("姓名或密碼錯誤");
         p.cw = w;
         p.progress = ((p.sw - p.cw) / (p.sw - p.target) * 100).toFixed(1);
         pushToGitHub();
@@ -236,11 +236,11 @@
     function savePeriod() {
         const start = document.getElementById('set_start').value;
         const end = document.getElementById('set_end').value;
-        if(!start || !end) return alert("請輸入完整日期");
+        if(!start || !end) return alert("請輸入日期");
         period.start = start;
         period.end = end;
         pushToGitHub();
-        alert("賽期已成功設定並同步");
+        alert("賽期已成功上傳");
     }
 
     function doAdminLogin() {
@@ -249,13 +249,13 @@
             document.getElementById('adminDataArea').style.display = 'block';
             renderAdmin();
         } else {
-            alert("管理密碼錯誤");
+            alert("密碼錯誤");
         }
     }
 
     function renderAdmin() {
         const list = document.getElementById('playerList');
-        list.innerHTML = '<strong>選手名單：</strong>' + players.map((p, i) => `
+        list.innerHTML = '<strong>管理名單：</strong>' + players.map((p, i) => `
             <div style="display:flex; justify-content:space-between; margin-top:5px;">
                 <span>${p.name}</span>
                 <button onclick="delPlayer(${i})" style="color:white; background:var(--danger); border:none; border-radius:4px; padding:2px 5px; cursor:pointer;">刪除</button>
@@ -264,7 +264,7 @@
     }
 
     function delPlayer(i) {
-        if(confirm("確定要刪除這位選手嗎？")) {
+        if(confirm("確定刪除此數據嗎？")) {
             players.splice(i, 1);
             pushToGitHub();
             renderAdmin();
@@ -272,7 +272,6 @@
     }
 
     window.onload = syncFromGitHub;
-    // 每 60 秒自動同步一次
     setInterval(syncFromGitHub, 60000);
 </script>
 </body>
