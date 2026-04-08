@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 減肥戰士 - 自動數據結算版</title>
+    <title>2026 減肥戰士 - 智慧 BMI 換算版</title>
     <style>
         :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #333; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; margin: 0; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=2000'); background-size: cover; background-attachment: fixed; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
@@ -68,14 +68,12 @@
                         <option value="22">目標 BMI 22 (精實體態)</option>
                         <option value="20">目標 BMI 20 (模特體態)</option>
                     </select>
-                    
                     <table class="bmi-ref-table">
                         <tr><th>BMI 分級</th><th>範圍值</th></tr>
                         <tr><td>過輕</td><td>< 18.5</td></tr>
                         <tr style="background:#e8f5e9;"><td>正常範圍</td><td>18.5 ~ 24</td></tr>
                         <tr style="background:#fff3e0;"><td>過重/肥胖</td><td>> 24</td></tr>
                     </table>
-                    
                     <input type="password" id="r_acc" placeholder="建立更新體重用密碼">
                     <button class="btn-submit" onclick="doRegister()">確認報名</button>
                 </div>
@@ -90,7 +88,7 @@
                 </div>
             </div>
             <div class="menu-item">
-                <button class="menu-trigger" onclick="toggleMenu('adminPanel')">🔑 管理者與賽期設定 <span>+</span></button>
+                <button class="menu-trigger" onclick="toggleMenu('adminPanel')">🔑 管理者設定 <span>+</span></button>
                 <div id="adminPanel" class="menu-content">
                     <input type="password" id="adm_pw" placeholder="管理密碼">
                     <button class="btn-submit" onclick="doAdminLogin()">登入管理後台</button>
@@ -196,6 +194,7 @@
             if (diff > 0) changeHtml = `<span class="rank-change up">▲ ${diff}</span>`;
             else if (diff < 0) changeHtml = `<span class="rank-change down">▼ ${Math.abs(diff)}</span>`;
 
+            // 進度條顯示邏輯：0%~100% 正常顯示，超過 100% 就填滿
             const barW = Math.min(Math.max(p.progress, 0), 100);
             const color = p.progress >= 80 ? '#27ae60' : (p.progress >= 50 ? '#f39c12' : '#e74c3c');
             
@@ -269,8 +268,20 @@
         const tbmi = parseFloat(document.getElementById('r_target_bmi').value);
         const acc = document.getElementById('r_acc').value;
         if(!name || !h || !sw) return alert("請填寫完整資訊");
-        const targetW = Math.round(((h/100)**2 * tbmi) * 10) / 10;
-        players.push({ name, h, sw, cw: sw, tbmi, target: targetW, acc, progress: 0, lastUpdate: new Date().toLocaleDateString() });
+        
+        // 初始註冊時即套用智慧 BMI 換算
+        const currentBMI = sw / ((h / 100) ** 2);
+        const baseBMI = 24; 
+        const targetBMI = tbmi;
+        
+        let initialProg = ((baseBMI - currentBMI) / (baseBMI - targetBMI)) * 100;
+
+        players.push({ 
+            name, h, sw, cw: sw, tbmi, 
+            acc, 
+            progress: initialProg.toFixed(1), 
+            lastUpdate: new Date().toLocaleDateString() 
+        });
         pushToGitHub(); toggleMenu('none');
     }
 
@@ -280,9 +291,24 @@
         const w = parseFloat(document.getElementById('u_w').value);
         const p = players.find(x => x.name === name && x.acc === acc);
         if(!p) return alert("驗證失敗");
-        p.cw = w; p.lastUpdate = new Date().toLocaleString();
-        p.progress = ((p.sw - p.cw) / (p.sw - p.target) * 100).toFixed(1);
-        pushToGitHub(); toggleMenu('none');
+        
+        p.cw = w; 
+        p.lastUpdate = new Date().toLocaleString();
+
+        // 💡 核心智慧換算邏輯：基於 BMI 24 門檻
+        const currentBMI = w / ((p.h / 100) ** 2);
+        const targetBMI = parseFloat(p.tbmi);
+        const baseBMI = 24; 
+
+        // 進度 = ((標準上限24 - 當前BMI) / (標準上限24 - 目標BMI)) * 100
+        // 若目標是 24，則改用 4 個 BMI 單位作為固定分母(意指減去4個BMI點即達標)，避免分母為0
+        let divisor = (baseBMI === targetBMI) ? 4 : (baseBMI - targetBMI);
+        let prog = ((baseBMI - currentBMI) / divisor) * 100;
+        
+        p.progress = prog.toFixed(1); 
+        
+        pushToGitHub(); 
+        toggleMenu('none');
     }
 
     window.onload = () => { syncFromGitHub(); setInterval(updateCountdown, 1000); };
