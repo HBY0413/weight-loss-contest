@@ -3,62 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 減肥戰士 - 最終視覺優化版</title>
+    <title>2026 減肥戰士 - 自動數據結算版</title>
     <style>
         :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #333; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; }
-        
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; margin: 0; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=2000'); background-size: cover; background-attachment: fixed; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-        
         .main-layout { display: flex; gap: 30px; width: 95%; max-width: 1200px; height: 90vh; align-items: flex-start; }
-        
-        /* 左側工具列 */
         .control-panel { flex: 0 0 380px; display: flex; flex-direction: column; gap: 15px; max-height: 85vh; overflow-y: auto; padding-right: 10px; padding-bottom: 30px; }
         .control-panel::-webkit-scrollbar { width: 5px; }
         .control-panel::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 10px; }
-
         .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0; }
         .treasure-header { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; padding: 20px; text-align: center; }
         .prize-amount { font-size: 36px; font-weight: 900; }
         .timer-box { background: #1a253a; color: #f1c40f; padding: 12px; font-size: 18px; text-align: center; font-weight: bold; }
-        
-        /* 排行榜卡片 */
         .rank-display { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-right: 10px; }
         .rank-card { background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid rgba(255,255,255,0.5); position: relative; }
         .rank-number { flex: 0 0 50px; text-align: center; font-size: 24px; font-weight: 900; color: var(--primary); }
         .rank-change { font-size: 11px; font-weight: bold; display: block; margin-top: -2px; }
         .up { color: var(--success); } .down { color: var(--danger); } .steady { color: #999; }
-        
         .p-info { flex: 0 0 130px; }
         .p-name { font-weight: 900; font-size: 18px; color: var(--primary); }
-
-        /* --- 進度條底色修正：#333333 + 透明度 --- */
-        .p-track { 
-            flex: 1; 
-            position: relative; 
-            height: 14px; 
-            background: rgba(51, 51, 51, 0.15); /* #333333 的 rgba 形式，設定 15% 透明度 */
-            border-radius: 7px; 
-            margin-top: 42px; 
-            border: 1px solid rgba(0,0,0,0.05); 
-            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* 增加一點內陰影質感 */
-        }
-        
+        /* 您要求的深色透明進度條底色 [#333333] */
+        .p-track { flex: 1; position: relative; height: 14px; background: rgba(51, 51, 51, 0.15); border-radius: 7px; margin-top: 42px; border: 1px solid rgba(0,0,0,0.05); }
         .p-fill { height: 100%; border-radius: 7px; transition: width 1s ease-in-out; position: absolute; left: 0; top: 0; z-index: 1; }
-        
-        /* 🏃 小人與百分比容器 */
         .runner-box { position: absolute; top: -54px; transition: left 1s ease-in-out; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; z-index: 5; }
         .runner-emoji { font-size: 30px; transform: scaleX(-1); line-height: 1; animation-name: bounce; animation-iteration-count: infinite; animation-direction: alternate; animation-timing-function: linear; }
         .runner-percent { font-size: 12px; font-weight: 900; background: rgba(255,255,255,0.9); padding: 1px 6px; border-radius: 10px; margin-bottom: -2px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-
         @keyframes bounce { from { transform: scaleX(-1) translateY(0); } to { transform: scaleX(-1) translateY(-6px); } }
-
-        /* 表單元素 */
         .menu-trigger { width: 100%; padding: 15px 25px; background: white; border: none; text-align: left; font-size: 15px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; }
         .menu-content { max-height: 0; overflow: hidden; transition: max-height 0.4s; background: #fff; }
         .menu-content.active { max-height: 1000px; padding: 20px; }
         .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
         input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 14px; }
-        label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -77,45 +52,9 @@
         </div>
 
         <div class="glass">
-            <div class="menu-item">
-                <button class="menu-trigger" onclick="toggleMenu('regForm')">🏃 我要報名參賽 <span>+</span></button>
-                <div id="regForm" class="menu-content">
-                    <input type="text" id="r_name" placeholder="姓名">
-                    <input type="number" id="r_h" placeholder="身高(cm)">
-                    <input type="number" id="r_w" placeholder="初始體重(kg)">
-                    <label>請選擇目標 BMI：</label>
-                    <select id="r_target_bmi">
-                        <option value="24">目標 BMI 24</option>
-                        <option value="22">目標 BMI 22</option>
-                        <option value="20">目標 BMI 20</option>
-                    </select>
-                    <input type="password" id="r_acc" placeholder="建立更新體重用密碼">
-                    <button class="btn-submit" onclick="doRegister()">確認報名</button>
-                </div>
-            </div>
-            <div class="menu-item">
-                <button class="menu-trigger" onclick="toggleMenu('updForm')">⚖️ 更新體重紀錄 <span>+</span></button>
-                <div id="updForm" class="menu-content">
-                    <input type="text" id="u_name" placeholder="姓名">
-                    <input type="password" id="u_acc" placeholder="密碼">
-                    <input type="number" id="u_w" placeholder="今日體重(kg)">
-                    <button class="btn-submit" style="background:var(--success);" onclick="doUpdate()">同步數據</button>
-                </div>
-            </div>
-            <div class="menu-item">
-                <button class="menu-trigger" onclick="toggleMenu('adminPanel')">🔑 管理者設定 <span>+</span></button>
-                <div id="adminPanel" class="menu-content">
-                    <input type="password" id="adm_pw" placeholder="管理密碼">
-                    <button class="btn-submit" onclick="doAdminLogin()">登入管理後台</button>
-                    <div id="adminDataArea" style="display:none; margin-top:15px; padding-top:10px; border-top:1px dashed #ccc;">
-                        <label>賽期設定：</label>
-                        <input type="date" id="set_start">
-                        <input type="date" id="set_end">
-                        <button class="btn-submit" onclick="savePeriod()" style="background:#444;">儲存賽期</button>
-                        <div id="adminPlayerList" style="margin-top:10px;"></div>
-                    </div>
-                </div>
-            </div>
+            <div class="menu-item"><button class="menu-trigger" onclick="toggleMenu('regForm')">🏃 我要報名參賽 <span>+</span></button><div id="regForm" class="menu-content"><input type="text" id="r_name" placeholder="姓名"><input type="number" id="r_h" placeholder="身高(cm)"><input type="number" id="r_w" placeholder="初始體重(kg)"><select id="r_target_bmi"><option value="24">目標 BMI 24</option><option value="22">目標 BMI 22</option><option value="20">目標 BMI 20</option></select><input type="password" id="r_acc" placeholder="建立更新體重用密碼"><button class="btn-submit" onclick="doRegister()">確認報名</button></div></div>
+            <div class="menu-item"><button class="menu-trigger" onclick="toggleMenu('updForm')">⚖️ 更新體重紀錄 <span>+</span></button><div id="updForm" class="menu-content"><input type="text" id="u_name" placeholder="姓名"><input type="password" id="u_acc" placeholder="密碼"><input type="number" id="u_w" placeholder="今日體重(kg)"><button class="btn-submit" style="background:var(--success);" onclick="doUpdate()">同步數據</button></div></div>
+            <div class="menu-item"><button class="menu-trigger" onclick="toggleMenu('adminPanel')">🔑 管理者與賽期設定 <span>+</span></button><div id="adminPanel" class="menu-content"><input type="password" id="adm_pw" placeholder="管理密碼"><button class="btn-submit" onclick="doAdminLogin()">登入管理後台</button><div id="adminDataArea" style="display:none; margin-top:15px; padding-top:10px; border-top:1px dashed #ccc;"><input type="date" id="set_start"><input type="date" id="set_end"><button class="btn-submit" onclick="savePeriod()" style="background:#444;">儲存賽期</button><button class="btn-submit" onclick="finalizeWeeklyRank(false)" style="background:var(--accent); margin-top:10px;">🏆 手動執行結算</button><div id="adminPlayerList" style="margin-top:10px;"></div></div></div></div>
         </div>
     </div>
     <div id="rankContainer" class="rank-display"></div>
@@ -129,8 +68,9 @@
 
     let players = [];
     let period = { start: "", end: "" };
+    let lastSundayRank = {}; 
+    let lastSettledDate = ""; 
     let fileSha = "";
-    let localRankMap = {};
 
     async function syncFromGitHub() {
         try {
@@ -141,37 +81,71 @@
             fileSha = data.sha;
             const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
             
-            const oldRankMap = {...localRankMap};
-            players.sort((a,b) => b.progress - a.progress).forEach((p, i) => { localRankMap[p.name] = i + 1; });
-            
             players = content.players || [];
             period = content.period || { start: "", end: "" };
-            
-            renderList(oldRankMap);
+            lastSundayRank = content.lastSundayRank || {};
+            lastSettledDate = content.lastSettledDate || "";
+
+            // 💡 檢查是否觸發自動結算日
+            checkAndAutoSettle();
+
+            renderList();
             updateCountdown();
             if(document.getElementById('adminDataArea').style.display === 'block') renderAdminList();
             document.getElementById('syncStatus').innerText = `✅ 最後同步: ${new Date().toLocaleTimeString()}`;
-        } catch (e) { document.getElementById('syncStatus').innerText = "❌ 同步失敗"; }
+        } catch (e) { document.getElementById('syncStatus').innerText = "❌ 連線不穩"; }
+    }
+
+    function checkAndAutoSettle() {
+        const now = new Date();
+        const lastSunday = new Date();
+        // 計算上個週日 00:00 的時間
+        lastSunday.setDate(now.getDate() - now.getDay()); 
+        lastSunday.setHours(0,0,0,0);
+        const dateKey = lastSunday.toISOString().split('T')[0];
+
+        // 若當前已過結算時間點且未記錄過此日期，執行背景自動結算
+        if (now >= lastSunday && lastSettledDate !== dateKey && players.length > 0) {
+            finalizeWeeklyRank(true, dateKey); 
+        }
+    }
+
+    async function finalizeWeeklyRank(isAuto = false, dateKey = "") {
+        if (!isAuto && !confirm("確定要將當前排名鎖定為本週基準點嗎？")) return;
+        
+        const currentSorted = [...players].sort((a,b) => b.progress - a.progress);
+        const snapshot = {};
+        currentSorted.forEach((p, i) => { snapshot[p.name] = i + 1; });
+
+        const newData = { players, period, lastSundayRank: snapshot, lastSettledDate: dateKey || new Date().toISOString().split('T')[0] };
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify(newData))));
+        
+        try {
+            await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
+                method: "PUT",
+                headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
+                body: JSON.stringify({ message: "Update Weekly Rank Baseline", content, sha: fileSha })
+            });
+            if(!isAuto) alert("排名基準已更新！");
+            syncFromGitHub();
+        } catch (e) { console.error(e); }
     }
 
     async function pushToGitHub() {
-        const content = btoa(unescape(encodeURIComponent(JSON.stringify({ players, period }))));
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify({ players, period, lastSundayRank, lastSettledDate }))));
         await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
-            method: "PUT",
-            headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ message: "Update Data", content, sha: fileSha })
+            method: "PUT", headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ message: "Sync Update", content, sha: fileSha })
         });
         syncFromGitHub();
     }
 
-    // 動態計算動畫跳動速度
     function calculateRunDuration(progress) {
         const p = parseFloat(progress);
-        const duration = 1.0 - (p * 0.008); 
-        return Math.max(0.2, Math.min(1.0, duration)).toFixed(2);
+        return Math.max(0.2, Math.min(1.0, 1.0 - (p * 0.008))).toFixed(2);
     }
 
-    function renderList(oldRankMap) {
+    function renderList() {
         document.getElementById('totalPrize').innerText = `NT$ ${players.length * 500}`;
         const container = document.getElementById('rankContainer');
         const sorted = [...players].sort((a,b) => b.progress - a.progress);
@@ -179,16 +153,16 @@
         
         sorted.forEach((p, i) => {
             const currentRank = i + 1;
-            const lastRank = oldRankMap[p.name] || currentRank;
-            const diff = lastRank - currentRank;
+            // 💡 抓取鎖定的週日排名基準計算 ▲▼
+            const baseRank = lastSundayRank[p.name] || currentRank;
+            const diff = baseRank - currentRank;
             let changeHtml = '<span class="rank-change steady">—</span>';
             if (diff > 0) changeHtml = `<span class="rank-change up">▲ ${diff}</span>`;
             else if (diff < 0) changeHtml = `<span class="rank-change down">▼ ${Math.abs(diff)}</span>`;
 
             const barW = Math.min(Math.max(p.progress, 0), 100);
             const color = p.progress >= 80 ? '#27ae60' : (p.progress >= 50 ? '#f39c12' : '#e74c3c');
-            const runDuration = calculateRunDuration(p.progress);
-
+            
             container.innerHTML += `
                 <div class="rank-card">
                     <div class="rank-number">${currentRank}${changeHtml}</div>
@@ -201,7 +175,7 @@
                         <div class="p-fill" style="width: ${barW}%; background: ${color};"></div>
                         <div class="runner-box" style="left: ${barW}%;">
                             <span class="runner-percent" style="color:${color}">${p.progress}%</span>
-                            <span class="runner-emoji" style="animation-duration: ${runDuration}s;">🏃</span>
+                            <span class="runner-emoji" style="animation-duration: ${calculateRunDuration(p.progress)}s;">🏃</span>
                         </div>
                     </div>
                 </div>`;
@@ -211,26 +185,17 @@
     function toggleMenu(id) {
         const target = document.getElementById(id);
         const isOpen = target.classList.contains('active');
-        document.querySelectorAll('.menu-content').forEach(el => {
-            el.classList.remove('active');
-            el.style.maxHeight = "0";
-        });
-        if (!isOpen) {
-            target.classList.add('active');
-            target.style.maxHeight = "800px";
-        }
+        document.querySelectorAll('.menu-content').forEach(el => { el.classList.remove('active'); el.style.maxHeight = "0"; });
+        if (!isOpen) { target.classList.add('active'); target.style.maxHeight = "800px"; }
     }
 
     function doAdminLogin() {
-        if(document.getElementById('adm_pw').value === 'gogofit666') {
-            document.getElementById('adminDataArea').style.display = 'block';
-            renderAdminList();
-        } else alert("密碼錯誤");
+        if(document.getElementById('adm_pw').value === 'gogofit666') { document.getElementById('adminDataArea').style.display = 'block'; renderAdminList(); }
+        else alert("密碼錯誤");
     }
 
     function renderAdminList() {
-        const listArea = document.getElementById('adminPlayerList');
-        listArea.innerHTML = players.map((p, i) => `
+        document.getElementById('adminPlayerList').innerHTML = players.map((p, i) => `
             <div style="display:flex; justify-content:space-between; font-size:13px; padding:5px 0; border-bottom:1px solid #eee;">
                 <span><b>${p.name}</b> (${p.cw}kg)</span>
                 <button onclick="deletePlayer(${i})" style="color:red; background:none; border:none; cursor:pointer;">移除</button>
@@ -238,17 +203,8 @@
         `).join('') || '尚無參賽者';
     }
 
-    function deletePlayer(i) {
-        if(confirm(`確定移除「${players[i].name}」？`)) { players.splice(i, 1); pushToGitHub(); }
-    }
-
-    function savePeriod() {
-        period.start = document.getElementById('set_start').value;
-        period.end = document.getElementById('set_end').value;
-        pushToGitHub();
-        alert("賽期已儲存");
-    }
-
+    function deletePlayer(i) { if(confirm(`確定移除「${players[i].name}」？`)) { players.splice(i, 1); pushToGitHub(); } }
+    function savePeriod() { period.start = document.getElementById('set_start').value; period.end = document.getElementById('set_end').value; pushToGitHub(); alert("賽期已儲存"); }
     function updateCountdown() {
         const dDisp = document.getElementById('ddayDisplay');
         const pDisp = document.getElementById('periodDisplay');
@@ -293,7 +249,7 @@
     }
 
     window.onload = () => { syncFromGitHub(); setInterval(updateCountdown, 1000); };
-    setInterval(syncFromGitHub, 60000);
+    setInterval(syncFromGitHub, 60000); // 每分鐘刷新資料
 </script>
 </body>
 </html>
