@@ -98,9 +98,9 @@
 </div>
 
 <script>
-    // --- GitHub 配置區 ---
+    // --- GitHub 配置區 (已填入你的資訊) ---
     const CONFIG = {
-        token: 'ghp_在這裏貼上你的TOKEN', 
+        token: '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', 
         owner: 'HBY0413',
         repo: 'weight-loss-contest',
         path: 'data.json'
@@ -114,39 +114,52 @@
         document.getElementById('syncStatus').innerText = "☁️ 正在從雲端同步...";
         try {
             const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
-                headers: { "Authorization": `token ${CONFIG.token}`, "Cache-Control": "no-cache" }
+                headers: { 
+                    "Authorization": `token ${CONFIG.token}`, 
+                    "Cache-Control": "no-cache" 
+                }
             });
-            if (!res.ok) throw new Error('Network response was not ok');
+            
+            if (!res.ok) throw new Error('連線失敗');
+            
             const data = await res.json();
             fileSha = data.sha;
-            // 處理 Base64 編碼，支援中文
+            
+            // 處理 Base64 並支援中文
             const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
             players = content.players || [];
             period = content.period || { start: "", end: "" };
+            
             render();
             document.getElementById('syncStatus').innerText = `✅ 最後同步: ${new Date().toLocaleTimeString()}`;
         } catch (e) {
             console.error("Sync Error:", e);
-            document.getElementById('syncStatus').innerText = "❌ 同步失敗，請檢查 Token 或 Console";
+            document.getElementById('syncStatus').innerText = "❌ 同步失敗，請確認 Token 權限或檔名";
         }
     }
 
     async function pushToGitHub() {
-        document.getElementById('syncStatus').innerText = "📤 正在將數據上傳至 GitHub...";
+        document.getElementById('syncStatus').innerText = "📤 正在上傳至 GitHub...";
         const content = btoa(unescape(encodeURIComponent(JSON.stringify({ players, period }))));
         try {
             const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
                 method: "PUT",
-                headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
+                headers: { 
+                    "Authorization": `token ${CONFIG.token}`, 
+                    "Content-Type": "application/json" 
+                },
                 body: JSON.stringify({ message: "Update Contest Data", content, sha: fileSha })
             });
+            
+            if (!res.ok) throw new Error('上傳失敗');
+            
             const result = await res.json();
-            fileSha = result.content.sha;
+            fileSha = result.content.sha; // 更新最新的 SHA
             document.getElementById('syncStatus').innerText = "✅ 資料已安全存入 GitHub";
             render();
         } catch (e) {
             console.error("Push Error:", e);
-            alert("上傳失敗，請確認 Token 權限是否包含 'repo'");
+            alert("上傳失敗，請確認 Token 權限勾選了 'repo'");
         }
     }
 
@@ -202,6 +215,11 @@
         players.push({ name, h, sw: w, cw: w, tbmi: 24, target: targetW, acc, progress: 0 });
         pushToGitHub();
         toggleMenu('none');
+        // 清空輸入
+        document.getElementById('r_name').value = '';
+        document.getElementById('r_h').value = '';
+        document.getElementById('r_w').value = '';
+        document.getElementById('r_acc').value = '';
     }
 
     function doUpdate() {
@@ -218,6 +236,7 @@
         p.progress = ((p.sw - p.cw) / (p.sw - p.target) * 100).toFixed(1);
         pushToGitHub();
         toggleMenu('none');
+        document.getElementById('u_w').value = '';
     }
 
     function savePeriod() {
@@ -260,9 +279,7 @@
         }
     }
 
-    // 初始化讀取雲端資料
     window.onload = syncFromGitHub;
-    // 每 60 秒背景自動與 GitHub 同步一次，確保數據最新
     setInterval(syncFromGitHub, 60000);
 </script>
 </body>
