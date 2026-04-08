@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 減肥戰士 - 動態衝刺版</title>
+    <title>2026 減肥戰士 - 完整修復版</title>
     <style>
         :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #333; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --track: #edf2f7; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; margin: 0; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=2000'); background-size: cover; background-attachment: fixed; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
@@ -15,7 +15,6 @@
         .timer-box { background: #1a253a; color: #f1c40f; padding: 12px; font-size: 18px; text-align: center; font-family: 'Courier New', Courier, monospace; font-weight: bold; border-top: 1px solid #333; }
         .rank-display { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-right: 10px; }
         
-        /* 排行榜卡片 */
         .rank-card { background: rgba(255, 255, 255, 0.95); padding: 15px 20px; border-radius: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid rgba(255,255,255,0.5); position: relative; }
         .rank-number { flex: 0 0 40px; text-align: center; font-size: 24px; font-weight: 900; color: var(--primary); }
         .rank-change { font-size: 11px; font-weight: bold; margin-top: -5px; }
@@ -29,14 +28,12 @@
         .p-track { flex: 1; position: relative; height: 16px; background: var(--track); border-radius: 8px; margin-top: 10px; }
         .p-fill { height: 100%; border-radius: 8px; transition: width 1s, background-color 0.5s; }
         
-        /* 跑步跑步起動畫 */
         .runner { position: absolute; top: -38px; transition: left 1s; transform: translateX(-50%) scaleX(-1); font-size: 32px; animation-name: run-move; animation-iteration-count: infinite; animation-direction: alternate; animation-timing-function: linear; }
         .target-label { position: absolute; right: 0; top: -25px; font-size: 10px; color: var(--accent); font-weight: bold; }
         .update-time { font-size: 10px; color: #999; margin-top: 4px; }
         
         @keyframes run-move { from { transform: translateX(-50%) scaleX(-1) translateY(0); } to { transform: translateX(-50%) scaleX(-1) translateY(-6px); } }
         
-        /* 選單與互動 */
         input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         .menu-trigger { width: 100%; padding: 15px 25px; background: white; border: none; text-align: left; font-size: 15px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; }
         .menu-content { max-height: 0; overflow: hidden; transition: max-height 0.3s; background: #fff; }
@@ -55,15 +52,15 @@
                 <div style="font-size: 12px; opacity: 0.9;">2026 減肥戰士獎金池</div>
                 <div class="prize-amount" id="totalPrize">NT$ 0</div>
             </div>
-            <div id="periodDisplay" style="background: #1a253a; color: #fff; font-size: 11px; text-align: center; padding: 5px; opacity: 0.7;">賽期載入中...</div>
+            <div id="periodDisplay" style="background: #1a253a; color: #fff; font-size: 11px; text-align: center; padding: 5px; opacity: 0.7;">同步雲端賽期中...</div>
             <div class="timer-box" id="ddayDisplay">00D 00:00:00</div>
             <div class="sync-status" id="syncStatus">☁️ 雲端同步中...</div>
         </div>
 
         <div class="glass">
-            <div class="menu-item"><button class="menu-trigger" onclick="toggleMenu('regForm')">🏃 我要報名參賽 <span>+</span></button><div id="regForm" class="menu-content"><input type="text" id="r_name" placeholder="姓名"><input type="number" id="r_h" placeholder="身高(cm)"><input type="number" id="r_w" placeholder="初始體重(kg)"><select id="r_target_bmi"><option value="24">目標 BMI 24 (標準)</option><option value="22">目標 BMI 22 (理想)</option><option value="20">目標 BMI 20 (精實)</option></select><input type="password" id="r_acc" placeholder="密碼"><button class="btn-submit" onclick="doRegister()">確認報名</button></div></div>
-            <div class="menu-item"><button class="menu-trigger" onclick="toggleMenu('updForm')">⚖️ 更新體重 <span>+</span></button><div id="updForm" class="menu-content"><input type="text" id="u_name" placeholder="姓名"><input type="password" id="u_acc" placeholder="密碼"><input type="number" id="u_w" placeholder="今日體重(kg)"><button class="btn-submit" style="background:var(--success);" onclick="doUpdate()">同步數據</button></div></div>
-            <div class="menu-item"><button class="menu-trigger" onclick="toggleMenu('adminPanel')">🔑 管理者設定 <span>+</span></button><div id="adminPanel" class="menu-content"><input type="password" id="adm_pw" placeholder="管理密碼"><button class="btn-submit" onclick="doAdminLogin()">登入</button><div id="adminDataArea" style="display:none; margin-top:10px;"><input type="date" id="set_start"><input type="date" id="set_end"><button class="btn-submit" onclick="savePeriod()">儲存</button></div></div></div>
+            <div class="menu-item"><button class="menu-trigger" onclick="toggleMenu('regForm')">🏃 我要報名參賽 <span>+</span></button><div id="regForm" class="menu-content"><input type="text" id="r_name" placeholder="真實姓名"><input type="number" id="r_h" placeholder="身高(cm)"><input type="number" id="r_w" placeholder="初始體重(kg)"><select id="r_target_bmi"><option value="24">目標 BMI 24 (標準)</option><option value="22">目標 BMI 22 (理想)</option><option value="20">目標 BMI 20 (精實)</option></select><input type="password" id="r_acc" placeholder="自訂更新密碼"><button class="btn-submit" onclick="doRegister()">確認報名</button></div></div>
+            <div class="menu-item"><button class="menu-trigger" onclick="toggleMenu('updForm')">⚖️ 更新體重紀錄 <span>+</span></button><div id="updForm" class="menu-content"><input type="text" id="u_name" placeholder="姓名"><input type="password" id="u_acc" placeholder="密碼"><input type="number" id="u_w" placeholder="今日體重(kg)"><button class="btn-submit" style="background:var(--success);" onclick="doUpdate()">同步數據</button></div></div>
+            <div class="menu-item"><button class="menu-trigger" onclick="toggleMenu('adminPanel')">🔑 管理者與賽期設定 <span>+</span></button><div id="adminPanel" class="menu-content"><input type="password" id="adm_pw" placeholder="管理密碼"><button class="btn-submit" onclick="doAdminLogin()">登入</button><div id="adminDataArea" style="display:none; margin-top:10px;"><label style="font-size:12px;color:#666">比賽開始日期</label><input type="date" id="set_start"><label style="font-size:12px;color:#666">比賽結束日期</label><input type="date" id="set_end"><button class="btn-submit" onclick="savePeriod()">儲存設定</button></div></div></div>
         </div>
     </div>
     <div id="rankContainer" class="rank-display"></div>
@@ -84,18 +81,26 @@
 
     async function syncFromGitHub() {
         try {
-            const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}?nocache=${new Date().getTime()}`, {
                 headers: { "Authorization": `token ${CONFIG.token}` }
             });
             const data = await res.json();
             fileSha = data.sha;
             const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+            
+            // 保存舊排名用於計算變化標籤
             players.sort((a,b) => b.progress - a.progress).forEach((p, index) => { localRankMap[p.name] = index + 1; });
+            
             players = content.players || [];
             period = content.period || { start: "", end: "" };
+            
             renderList();
+            updateCountdown(); // 修正：抓到資料立刻更新賽期顯示
+            
             document.getElementById('syncStatus').innerText = `✅ 最後雲端同步: ${new Date().toLocaleTimeString()}`;
-        } catch (e) { document.getElementById('syncStatus').innerText = "❌ 同步失敗"; }
+        } catch (e) { 
+            document.getElementById('syncStatus').innerText = "❌ 同步失敗 (請檢查網絡或Token)"; 
+        }
     }
 
     async function pushToGitHub() {
@@ -103,15 +108,13 @@
         await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
             method: "PUT",
             headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ message: "Update", content, sha: fileSha })
+            body: JSON.stringify({ message: "Update Data", content, sha: fileSha })
         });
         syncFromGitHub();
     }
 
-    // 核心優化：計算動態跑步速度
     function calculateRunDuration(progress) {
         const p = parseFloat(progress);
-        // 公式：1.0s - (進度百分比 * 0.008s)，最快 0.2s，最慢 1.0s
         const duration = 1.0 - (p * 0.008);
         return Math.max(0.2, Math.min(1.0, duration)).toFixed(2);
     }
@@ -120,7 +123,7 @@
         document.getElementById('totalPrize').innerText = `NT$ ${players.length * 500}`;
         const container = document.getElementById('rankContainer');
         const sorted = [...players].sort((a,b) => b.progress - a.progress);
-        container.innerHTML = sorted.length ? '' : '<div class="glass" style="padding:40px; text-align:center;">等待挑戰者...</div>';
+        container.innerHTML = sorted.length ? '' : '<div class="glass" style="padding:40px; text-align:center;">等待挑戰者加入...</div>';
         
         sorted.forEach((p, i) => {
             const currentRank = i + 1;
@@ -132,8 +135,6 @@
 
             const barW = Math.min(Math.max(p.progress, 0), 100);
             const color = p.progress >= 80 ? '#27ae60' : (p.progress >= 50 ? '#f39c12' : '#e74c3c');
-            
-            // 核心優化：取得個人的動態動畫時間
             const runDuration = calculateRunDuration(p.progress);
 
             container.innerHTML += `
@@ -153,14 +154,97 @@
         });
     }
 
-    // 基本功能函式省略...
-    function updateCountdown() { const dDisp = document.getElementById('ddayDisplay'); if(!period.start) return; const now = new Date(); const start = new Date(period.start + " 00:00:00"); const end = new Date(period.end + " 23:59:59"); let target = now < start ? start : (now <= end ? end : null); let prefix = now < start ? "距開賽還有 " : "剩餘賽程："; if (target) { const diff = target - now; const d = Math.floor(diff / 86400000); const h = Math.floor((diff % 86400000) / 3600000); const m = Math.floor((diff % 3600000) / 60000); const s = Math.floor((diff % 60000) / 1000); dDisp.innerText = `${prefix}${d}D ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`; } else dDisp.innerText = "賽事已結束"; }
-    function toggleMenu(id) { const target = document.getElementById(id); const isOpen = target.classList.contains('active'); document.querySelectorAll('.menu-content').forEach(el => el.classList.remove('active')); if (!isOpen) target.classList.add('active'); }
-    function doRegister() { const name = document.getElementById('r_name').value; const h = parseFloat(document.getElementById('r_h').value); const sw = parseFloat(document.getElementById('r_w').value); const tbmi = parseFloat(document.getElementById('r_target_bmi').value); const acc = document.getElementById('r_acc').value; const targetW = Math.round(((h/100)**2 * tbmi) * 10) / 10; players.push({ name, h, sw, cw: sw, tbmi, target: targetW, acc, progress: 0, lastUpdate: new Date().toLocaleDateString() }); pushToGitHub(); toggleMenu('none'); }
-    function doUpdate() { const name = document.getElementById('u_name').value; const acc = document.getElementById('u_acc').value; const w = parseFloat(document.getElementById('u_w').value); const p = players.find(x => x.name === name && x.acc === acc); if(!p) return alert("驗證失敗"); p.cw = w; p.lastUpdate = new Date().toLocaleString(); p.progress = ((p.sw - p.cw) / (p.sw - p.target) * 100).toFixed(1); pushToGitHub(); toggleMenu('none'); }
-    function doAdminLogin() { if(document.getElementById('adm_pw').value === 'gogofit666') document.getElementById('adminDataArea').style.display='block'; }
-    function savePeriod() { period.start = document.getElementById('set_start').value; period.end = document.getElementById('set_end').value; pushToGitHub(); }
-    window.onload = () => { syncFromGitHub(); setInterval(updateCountdown, 1000); };
+    function updateCountdown() {
+        const dDisp = document.getElementById('ddayDisplay');
+        const pDisp = document.getElementById('periodDisplay');
+        
+        if(!period.start || !period.end) {
+            pDisp.innerText = "尚未設定賽期";
+            return;
+        }
+
+        // 修正：更新上方文字
+        pDisp.innerText = `期間：${period.start} ~ ${period.end}`;
+
+        const now = new Date();
+        const start = new Date(period.start.replace(/-/g, "/") + " 00:00:00");
+        const end = new Date(period.end.replace(/-/g, "/") + " 23:59:59");
+        
+        let target = null;
+        let prefix = "";
+
+        if (now < start) {
+            target = start;
+            prefix = "距開賽還有 ";
+        } else if (now <= end) {
+            target = end;
+            prefix = "剩餘賽程：";
+        }
+
+        if (target) {
+            const diff = target - now;
+            const d = Math.floor(diff / 86400000);
+            const h = Math.floor((diff % 86400000) / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            dDisp.innerText = `${prefix}${d}D ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        } else {
+            dDisp.innerText = "本期賽事已結束";
+        }
+    }
+
+    function toggleMenu(id) { 
+        const target = document.getElementById(id);
+        const isOpen = target.classList.contains('active');
+        document.querySelectorAll('.menu-content').forEach(el => el.classList.remove('active'));
+        if (!isOpen) target.classList.add('active');
+    }
+
+    function doRegister() {
+        const name = document.getElementById('r_name').value;
+        const h = parseFloat(document.getElementById('r_h').value);
+        const sw = parseFloat(document.getElementById('r_w').value);
+        const tbmi = parseFloat(document.getElementById('r_target_bmi').value);
+        const acc = document.getElementById('r_acc').value;
+        if(!name || !h || !sw) return alert("請填寫完整資訊");
+        const targetW = Math.round(((h/100)**2 * tbmi) * 10) / 10;
+        players.push({ name, h, sw, cw: sw, tbmi, target: targetW, acc, progress: 0, lastUpdate: new Date().toLocaleDateString() });
+        pushToGitHub(); toggleMenu('none');
+    }
+
+    function doUpdate() {
+        const name = document.getElementById('u_name').value;
+        const acc = document.getElementById('u_acc').value;
+        const w = parseFloat(document.getElementById('u_w').value);
+        const p = players.find(x => x.name === name && x.acc === acc);
+        if(!p) return alert("姓名或密碼驗證失敗");
+        p.cw = w; p.lastUpdate = new Date().toLocaleString();
+        p.progress = ((p.sw - p.cw) / (p.sw - p.target) * 100).toFixed(1);
+        pushToGitHub(); toggleMenu('none');
+    }
+
+    function doAdminLogin() { 
+        if(document.getElementById('adm_pw').value === 'gogofit666') {
+            document.getElementById('adminDataArea').style.display='block';
+            if(period.start) document.getElementById('set_start').value = period.start;
+            if(period.end) document.getElementById('set_end').value = period.end;
+        } else {
+            alert("密碼錯誤");
+        }
+    }
+
+    function savePeriod() { 
+        period.start = document.getElementById('set_start').value; 
+        period.end = document.getElementById('set_end').value; 
+        if(!period.start || !period.end) return alert("請選擇日期");
+        pushToGitHub(); 
+        alert("賽期儲存成功！");
+    }
+
+    window.onload = () => { 
+        syncFromGitHub(); 
+        setInterval(updateCountdown, 1000); 
+    };
     setInterval(syncFromGitHub, 60000); 
 </script>
 </body>
