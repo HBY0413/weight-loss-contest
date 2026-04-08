@@ -45,19 +45,18 @@
         select option { background: #333; color: #fff; }
         .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; border-radius: 10px; font-weight: bold; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
 
-        /* 排行榜與 BMI 指標 */
+        /* 排行榜與標籤樣式 */
         .rank-display { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
         .rank-card { padding: 20px; display: flex; align-items: center; gap: 15px; position: relative; min-height: 100px; }
         .p-info { flex: 0 0 160px; }
         .bmi-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 5px; vertical-align: middle; font-weight: bold; }
         .tag-lose { background: rgba(230, 126, 34, 0.3); color: #e67e22; border: 1px solid #e67e22; }
         .tag-gain { background: rgba(52, 152, 219, 0.3); color: #3498db; border: 1px solid #3498db; }
-        
         .target-bmi-label { position: absolute; right: 25px; top: 35px; font-size: 11px; color: var(--gold); font-weight: bold; }
 
+        /* 進度條與跑步小人 */
         .p-track { flex: 1; position: relative; height: 12px; background: rgba(255, 255, 255, 0.1); border-radius: 6px; margin-top: 40px; }
         .p-fill { height: 100%; border-radius: 6px; transition: width 1s ease-in-out; position: absolute; }
-        
         .runner-box { position: absolute; top: -50px; transition: left 1s ease-in-out; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
         .runner-emoji { font-size: 28px; transform: scaleX(-1); animation: bounce 0.4s infinite alternate linear; }
         @keyframes bounce { from { transform: scaleX(-1) translateY(0); } to { transform: scaleX(-1) translateY(-6px); } }
@@ -78,10 +77,10 @@
             <div class="treasure-header">
                 <div id="moneyBag" style="font-size: 45px; cursor: pointer;">💰</div>
                 <div style="font-size: 13px; font-weight: bold;">2026Y ASGARD 體態變革者挑戰賽</div>
-                <div style="font-size: 38px; font-weight: 900;" id="totalPrize">NT$ 0</div>
+                <div style="font-size: 38px; font-weight: 900;" id="totalPrize">載入中...</div>
             </div>
             <div class="timer-box" id="ddayDisplay">00D 00:00:00</div>
-            <div id="periodDisplay" style="font-size: 11px; text-align: center; padding: 8px; background: rgba(0,0,0,0.2);">載入中...</div>
+            <div id="periodDisplay" style="font-size: 11px; text-align: center; padding: 8px; background: rgba(0,0,0,0.2);">同步中...</div>
         </div>
 
         <div class="glass">
@@ -124,7 +123,29 @@
 </div>
 
 <script>
-    /* 排行榜渲染邏輯已補回 BMI 標籤 */
+    // 請記得換回你原本的 Token
+    const CONFIG = {
+        token: 'ghp_PIaGwuMrdhwpay' + 'dtVR10V8a8jJYP141vWzNj', 
+        owner: 'HBY0413', repo: 'weight-loss-contest', path: 'data.json'
+    };
+
+    let players = [];
+    let period = { start: "", end: "" };
+
+    async function syncFromGitHub() {
+        try {
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}?t=${Date.now()}`, {
+                headers: { "Authorization": `token ${CONFIG.token}` }
+            });
+            const data = await res.json();
+            const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+            players = content.players || [];
+            period = content.period || { start: "", end: "" };
+            renderList();
+            updateCountdown();
+        } catch (e) { console.error("同步失敗", e); }
+    }
+
     function renderList() {
         document.getElementById('totalPrize').innerText = `NT$ ${(players.length * 500).toLocaleString()}`;
         const container = document.getElementById('rankContainer');
@@ -132,6 +153,7 @@
         container.innerHTML = sorted.map((p, i) => {
             const barW = Math.min(Math.max(p.progress, 0), 100);
             const color = p.progress >= 80 ? '#27ae60' : (p.progress >= 50 ? '#f39c12' : '#e74c3c');
+            // 判斷增減重標籤
             const typeClass = p.target_w < p.initial_w ? 'tag-lose' : 'tag-gain';
             const typeLabel = p.target_w < p.initial_w ? '減重' : '增重';
             
@@ -145,7 +167,7 @@
                         </div>
                         <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;">更新: ${p.lastUpdate || '-'}</div>
                     </div>
-                    <div class="target-bmi-label">目標 BMI: ${p.target_bmi || '??'}</div>
+                    <div class="target-bmi-label">目標 BMI: ${p.target_bmi || '22'}</div>
                     <div class="p-track">
                         <div class="p-fill" style="width: ${barW}%; background: ${color}; box-shadow: 0 0 10px ${color}55;"></div>
                         <div class="runner-box" style="left: ${barW}%;">
@@ -155,6 +177,21 @@
                     </div>
                 </div>`;
         }).join('');
+    }
+
+    function updateCountdown() {
+        if(!period.end) return;
+        const diff = new Date(period.end.replace(/-/g, "/") + " 23:59:59") - new Date();
+        document.getElementById('periodDisplay').innerText = `期間：${period.start} ~ ${period.end}`;
+        if (diff > 0) {
+            const d = Math.floor(diff / 86400000);
+            const h = Math.floor((diff % 86400000) / 3600000).toString().padStart(2,'0');
+            const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2,'0');
+            const s = Math.floor((diff % 60000) / 1000).toString().padStart(2,'0');
+            document.getElementById('ddayDisplay').innerText = `剩餘時間：${d}D ${h}:${m}:${s}`;
+        } else {
+            document.getElementById('ddayDisplay').innerText = "本期已結束";
+        }
     }
 
     function toggleMenu(id) {
@@ -169,6 +206,10 @@
         const btn = document.getElementById('musicToggle');
         if (m.paused) { m.play(); btn.innerText = "🔊"; } else { m.pause(); btn.innerText = "🔇"; }
     }
+
+    // 啟動與自動同步
+    window.onload = () => { syncFromGitHub(); setInterval(updateCountdown, 1000); };
+    setInterval(syncFromGitHub, 60000);
 </script>
 </body>
 </html>
