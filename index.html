@@ -13,12 +13,26 @@
             background-size: cover; background-attachment: fixed; min-height: 100vh;
             display: flex; align-items: center; justify-content: center; color: var(--text); overflow: hidden;
         }
-        .main-layout { display: flex; gap: 25px; width: 95%; max-width: 1400px; height: 85vh; align-items: flex-start; }
         
-        /* 控制面板維持原有玻璃質感 */
+        /* 核心修正：使用 stretch 讓左右等高 */
+        .main-layout { 
+            display: flex; 
+            gap: 25px; 
+            width: 95%; 
+            max-width: 1400px; 
+            height: 85vh; 
+            align-items: stretch; /* 修改這裡：讓子元素高度一致 */
+        }
+        
+        /* 左側控制面板 */
         .control-panel { 
-            flex: 0 0 320px; display: flex; flex-direction: column; gap: 15px; height: 100%; 
-            overflow-y: auto; scrollbar-width: none;
+            flex: 0 0 320px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            /* 讓控制面板內容可以滾動，但整體高度跟隨父層 */
+            overflow-y: auto; 
+            scrollbar-width: none;
         }
         .control-panel::-webkit-scrollbar { display: none; }
 
@@ -39,9 +53,15 @@
         input, select { width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; box-sizing: border-box; }
         
         /* 右側排行榜：增加間距讓背景露出來 */
-        .rank-display { flex: 1; height: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 35px; padding: 20px 10px; }
+        .rank-display { 
+            flex: 1; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 35px; 
+            padding: 10px; /* 稍微減少 padding 讓對齊更精準 */
+        }
         
-        /* 核心變動：更矮、更透明的卡片 */
         .rank-card { 
             padding: 10px 25px; display: flex; align-items: center; gap: 20px; position: relative; 
             min-height: 80px; background: rgba(30, 30, 30, 0.3) !important; 
@@ -51,7 +71,6 @@
         
         .p-info { flex: 0 0 160px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         
-        /* 進度條定位微調 */
         .p-track { flex: 1; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; position: relative; margin-top: 30px; }
         .p-fill { height: 100%; border-radius: 6px; transition: width 1s ease-in-out; position: absolute; }
         
@@ -88,8 +107,7 @@
             <div id="ddayDisplay" style="text-align:center; padding: 12px; background: rgba(0,0,0,0.5); color: var(--gold); font-weight: bold; font-family: monospace; font-size: 18px;">00D 00:00:00</div>
         </div>
 
-        <div class="glass">
-            <div class="menu-item">
+        <div class="glass" style="flex: 1;"> <div class="menu-item">
                 <button class="menu-trigger" onclick="toggleMenu('regForm')">🏃 我要報名參賽 <span>+</span></button>
                 <div id="regForm" class="menu-content">
                     <input type="text" id="r_name" placeholder="姓名">
@@ -103,7 +121,7 @@
                     <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 12px; padding: 0 5px; line-height: 1.4;">
                         * 進度計算：依據 (身高/100)² × 目標 BMI 換算目標體重，並計算當前達成率。
                     </div>
-                    <input type="password" id="r_acc" placeholder="設定更新體重密碼">
+                    <input type="password" id="r_acc" placeholder="設定更新密碼">
                     <button style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doRegister()">確認報名</button>
                 </div>
             </div>
@@ -124,11 +142,10 @@
                         <button style="width:100%; padding:12px; background:var(--accent); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doAdminLogin()">進入管理模式</button>
                     </div>
                     <div id="adminDataArea" style="display:none; margin-top:10px;">
-                        <label style="font-size:11px; opacity:0.7;">賽期設定：</label>
                         <input type="date" id="set_start">
                         <input type="date" id="set_end">
-                        <button style="width:100%; padding:10px; background:#444; color:white; border:none; border-radius:8px; cursor:pointer; margin-bottom:15px;" onclick="savePeriod()">儲存賽期設定</button>
-                        <div id="adminPlayerList" style="max-height: 250px; overflow-y: auto; margin-bottom: 15px;"></div>
+                        <button style="width:100%; padding:10px; background:#444; color:white; border:none; border-radius:8px; cursor:pointer; margin-bottom:15px;" onclick="savePeriod()">儲存賽期</button>
+                        <div id="adminPlayerList" style="max-height: 150px; overflow-y: auto;"></div>
                         <button style="width:100%; padding:10px; background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:8px; cursor:pointer;" onclick="doAdminLogout()">登出</button>
                     </div>
                 </div>
