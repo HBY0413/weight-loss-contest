@@ -14,25 +14,12 @@
             display: flex; align-items: center; justify-content: center; color: var(--text); overflow: hidden;
         }
         
-        /* 核心修正：使用 stretch 讓左右等高 */
         .main-layout { 
-            display: flex; 
-            gap: 25px; 
-            width: 95%; 
-            max-width: 1400px; 
-            height: 85vh; 
-            align-items: stretch; /* 修改這裡：讓子元素高度一致 */
+            display: flex; gap: 25px; width: 95%; max-width: 1400px; height: 85vh; align-items: stretch;
         }
         
-        /* 左側控制面板 */
         .control-panel { 
-            flex: 0 0 320px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-            /* 讓控制面板內容可以滾動，但整體高度跟隨父層 */
-            overflow-y: auto; 
-            scrollbar-width: none;
+            flex: 0 0 320px; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; scrollbar-width: none;
         }
         .control-panel::-webkit-scrollbar { display: none; }
 
@@ -47,20 +34,19 @@
             text-align: left; font-size: 16px; font-weight: bold; cursor: pointer; color: #fff;
             display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05);
         }
+
+        /* 修正：選單截斷問題，增加內容滾動 */
         .menu-content { max-height: 0; overflow: hidden; transition: all 0.3s ease-out; background: rgba(0,0,0,0.2); }
-        .menu-content.active { max-height: 1000px; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .menu-content.active { 
+            max-height: 450px; /* 限制最大高度 */
+            overflow-y: auto;  /* 允許內部滾動 */
+            padding: 15px 20px; 
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+        }
         
         input, select { width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; box-sizing: border-box; }
         
-        /* 右側排行榜：增加間距讓背景露出來 */
-        .rank-display { 
-            flex: 1; 
-            overflow-y: auto; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 35px; 
-            padding: 10px; /* 稍微減少 padding 讓對齊更精準 */
-        }
+        .rank-display { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 35px; padding: 10px; }
         
         .rank-card { 
             padding: 10px 25px; display: flex; align-items: center; gap: 20px; position: relative; 
@@ -69,8 +55,14 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
         
-        .p-info { flex: 0 0 160px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .p-info { flex: 0 0 180px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         
+        /* 升降排名標籤樣式 */
+        .rank-trend { font-size: 12px; font-weight: bold; margin-left: 5px; }
+        .trend-up { color: #2ecc71; }
+        .trend-down { color: #e74c3c; }
+        .trend-none { color: #95a5a6; }
+
         .p-track { flex: 1; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; position: relative; margin-top: 30px; }
         .p-fill { height: 100%; border-radius: 6px; transition: width 1s ease-in-out; position: absolute; }
         
@@ -107,7 +99,8 @@
             <div id="ddayDisplay" style="text-align:center; padding: 12px; background: rgba(0,0,0,0.5); color: var(--gold); font-weight: bold; font-family: monospace; font-size: 18px;">00D 00:00:00</div>
         </div>
 
-        <div class="glass" style="flex: 1;"> <div class="menu-item">
+        <div class="glass" style="flex: 1;"> 
+            <div class="menu-item">
                 <button class="menu-trigger" onclick="toggleMenu('regForm')">🏃 我要報名參賽 <span>+</span></button>
                 <div id="regForm" class="menu-content">
                     <input type="text" id="r_name" placeholder="姓名">
@@ -122,7 +115,7 @@
                         * 進度計算：依據 (身高/100)² × 目標 BMI 換算目標體重，並計算當前達成率。
                     </div>
                     <input type="password" id="r_acc" placeholder="設定更新密碼">
-                    <button style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doRegister()">確認報名</button>
+                    <button id="regBtn" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doRegister()">確認報名</button>
                 </div>
             </div>
             <div class="menu-item">
@@ -131,7 +124,7 @@
                     <input type="text" id="u_name" placeholder="姓名">
                     <input type="password" id="u_acc" placeholder="輸入密碼">
                     <input type="number" id="u_w" placeholder="今日體重(kg)">
-                    <button style="width:100%; padding:12px; background:var(--success); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doUpdate()">同步數據</button>
+                    <button id="updBtn" style="width:100%; padding:12px; background:var(--success); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doUpdate()">同步數據</button>
                 </div>
             </div>
             <div class="menu-item">
@@ -163,11 +156,17 @@
     };
 
     let players = [];
+    let prevRankMap = {}; // 用於記錄上一次的排名
     let period = { start: "", end: "2026-04-13" };
     let fileSha = "";
 
     async function syncFromGitHub() {
         try {
+            // 在更新列表前，先記住目前的排名順序
+            const currentSorted = [...players].sort((a, b) => b.progress - a.progress);
+            prevRankMap = {};
+            currentSorted.forEach((p, index) => { prevRankMap[p.name] = index + 1; });
+
             const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}?t=${Date.now()}`, {
                 headers: { "Authorization": `token ${CONFIG.token}` }
             });
@@ -185,11 +184,12 @@
 
     async function pushToGitHub() {
         const content = btoa(unescape(encodeURIComponent(JSON.stringify({ players, period }))));
-        await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
+        const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
             method: "PUT", headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
             body: JSON.stringify({ message: "Update", content, sha: fileSha })
         });
-        syncFromGitHub();
+        if (!res.ok) throw new Error("GitHub 同步衝突，請重試");
+        await syncFromGitHub();
     }
 
     function renderList() {
@@ -203,12 +203,24 @@
             const speed = 0.6 - (barW / 100 * 0.45);
             const color = barW >= 80 ? '#27ae60' : (barW >= 40 ? '#f39c12' : '#e74c3c');
 
+            // 計算排名升降
+            const currentRank = i + 1;
+            const lastRank = prevRankMap[p.name];
+            let trendHtml = `<span class="rank-trend trend-none">-</span>`;
+            if (lastRank) {
+                if (currentRank < lastRank) trendHtml = `<span class="rank-trend trend-up">▲</span>`;
+                else if (currentRank > lastRank) trendHtml = `<span class="rank-trend trend-down">▼</span>`;
+            }
+
             return `
                 <div class="rank-card">
-                    <div style="font-size: 24px; font-weight: 900; color: var(--gold); width: 30px;">${i + 1}</div>
+                    <div style="font-size: 24px; font-weight: 900; color: var(--gold); width: 45px; display:flex; flex-direction:column; align-items:center;">
+                        ${currentRank}
+                        ${trendHtml}
+                    </div>
                     <div class="p-info">
                         <div style="font-size: 18px; font-weight: bold;">
-                            ${i === 0 ? '👑 ' : ''}${p.name}
+                            ${currentRank === 1 ? '👑 ' : ''}${p.name}
                             <span class="bmi-tag ${isLosing ? 'tag-lose' : 'tag-gain'}">${isLosing ? '減重' : '增重'}</span>
                         </div>
                         <div style="font-size: 11px; opacity: 0.6; margin-top: 5px;">更新: ${p.lastUpdate || '-'}</div>
@@ -263,12 +275,17 @@
         `).join('');
     }
 
-    function deletePlayer(i) { if(confirm(`移除 ${players[i].name}？`)) { players.splice(i,1); pushToGitHub(); } }
+    async function deletePlayer(i) { 
+        if(confirm(`移除 ${players[i].name}？`)) { 
+            players.splice(i,1); 
+            await pushToGitHub(); 
+        } 
+    }
     
-    function savePeriod() { 
+    async function savePeriod() { 
         period.start = document.getElementById('set_start').value; 
         period.end = document.getElementById('set_end').value; 
-        pushToGitHub(); alert("賽期已更新"); 
+        await pushToGitHub(); alert("賽期已更新"); 
     }
 
     function makeItRain() {
@@ -297,29 +314,54 @@
         document.getElementById('ddayDisplay').innerText = `${String(d).padStart(2,'0')}D ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     }
 
-    function doRegister() {
+    async function doRegister() {
+        const btn = document.getElementById('regBtn');
         const name = document.getElementById('r_name').value;
         const h = parseFloat(document.getElementById('r_h').value);
         const sw = parseFloat(document.getElementById('r_w').value);
         const tbmi = parseFloat(document.getElementById('r_target_bmi').value);
         const acc = document.getElementById('r_acc').value;
+        
         if(!name || !h || !sw || !acc) return alert("請填寫完整");
-        players.push({ name, h, sw, cw: sw, tbmi, acc, progress: 0, lastUpdate: new Date().toLocaleString() });
-        pushToGitHub(); toggleMenu('regForm');
+
+        try {
+            btn.disabled = true; btn.innerText = "處理中...";
+            await syncFromGitHub(); // 強制抓取最新 SHA
+            players.push({ name, h, sw, cw: sw, tbmi, acc, progress: 0, lastUpdate: new Date().toLocaleString() });
+            await pushToGitHub();
+            alert("報名成功！");
+            toggleMenu('regForm');
+        } catch(e) { alert(e.message); } 
+        finally { btn.disabled = false; btn.innerText = "確認報名"; }
     }
 
-    function doUpdate() {
+    async function doUpdate() {
+        const btn = document.getElementById('updBtn');
         const name = document.getElementById('u_name').value;
         const acc = document.getElementById('u_acc').value;
         const w = parseFloat(document.getElementById('u_w').value);
-        const p = players.find(x => x.name === name && x.acc === acc);
-        if(!p) return alert("驗證失敗");
-        p.cw = w; p.lastUpdate = new Date().toLocaleString();
-        const targetW = p.tbmi * ((p.h/100)*(p.h/100));
-        const initialGap = Math.abs(p.sw - targetW);
-        const currentGap = Math.abs(w - targetW);
-        p.progress = initialGap === 0 ? 100 : Math.max(0, ((1 - (currentGap / initialGap)) * 100)).toFixed(1);
-        pushToGitHub(); toggleMenu('updForm');
+
+        if(!name || !acc || isNaN(w)) return alert("請輸入完整資訊");
+
+        try {
+            btn.disabled = true; btn.innerText = "同步中...";
+            await syncFromGitHub(); // 強制抓取最新 SHA 與資料
+            
+            const p = players.find(x => x.name === name && x.acc === acc);
+            if(!p) throw new Error("驗證失敗：姓名或密碼不正確");
+
+            p.cw = w; 
+            p.lastUpdate = new Date().toLocaleString();
+            const targetW = p.tbmi * ((p.h/100)*(p.h/100));
+            const initialGap = Math.abs(p.sw - targetW);
+            const currentGap = Math.abs(w - targetW);
+            p.progress = initialGap === 0 ? 100 : Math.max(0, ((1 - (currentGap / initialGap)) * 100)).toFixed(1);
+            
+            await pushToGitHub();
+            alert("🎉 體重數據同步成功！");
+            toggleMenu('updForm');
+        } catch (e) { alert(e.message); }
+        finally { btn.disabled = false; btn.innerText = "同步數據"; }
     }
 
     window.onload = () => {
