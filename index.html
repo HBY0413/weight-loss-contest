@@ -42,7 +42,6 @@
             overflow: hidden; flex-shrink: 0;
         }
 
-        /* 統一輔助說明文字的樣式：對標圖中 30s 的大小與顏色 */
         .sync-style-text {
             font-size: 10px;
             color: rgba(255, 255, 255, 0.5);
@@ -93,6 +92,8 @@
         
         input, select { width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; box-sizing: border-box; }
         
+        select option { background: #1a253a; color: white; }
+
         .rank-display { flex: 1; display: flex; flex-direction: column; gap: 20px; padding: 10px; }
         
         .rank-card { 
@@ -155,18 +156,21 @@
             <button class="menu-trigger" onclick="toggleMenu('regForm')">🏃 我要報名參賽 <span>+</span></button>
             <div id="regForm" class="menu-content">
                 <div class="formula-box">
-                    📊 <b>規則說明：</b><br>
-                    1. <b>達標機制</b>：不論增減重，只要達到或超越目標 BMI 體重，達成率即為 <b>100%</b>。<br>
-                    2. <b>計算方式</b>：未達標前，依據「目前與目標差距」佔「初始與目標差距」之比例計算。
+                    📊 <b>目標設定建議：</b><br>
+                    • <b>BMI 24</b>：維持健康標準 (不超重)<br>
+                    • <b>BMI 22</b>：精實健美體態 (穿衣好看)<br>
+                    • <b>BMI 20</b>：極致挑戰等級 (運動員感)
                 </div>
                 <input type="text" id="r_name" placeholder="姓名">
                 <input type="number" id="r_h" placeholder="身高(cm)">
                 <input type="number" id="r_w" placeholder="初始體重(kg)">
+                
                 <select id="r_target_bmi">
-                    <option value="24">目標 BMI 24</option>
-                    <option value="22">目標 BMI 22</option>
-                    <option value="20">目標 BMI 20</option>
+                    <option value="24">目標 BMI 24 | 健康維護層級</option>
+                    <option value="22">目標 BMI 22 | 精實健美層級</option>
+                    <option value="20">目標 BMI 20 | 極致挑戰層級</option>
                 </select>
+                
                 <input type="password" id="r_acc" placeholder="設定體重更新密碼">
                 <button id="regBtn" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doRegister()">確認報名</button>
             </div>
