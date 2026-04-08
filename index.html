@@ -27,7 +27,7 @@
         .treasure-header { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; padding: 25px 20px; text-align: center; }
         .timer-box { background: rgba(0, 0, 0, 0.7); color: #f1c40f; padding: 12px; font-size: 18px; text-align: center; font-weight: bold; }
         
-        /* 選單內部樣式修正 */
+        /* 選單樣式 */
         .menu-item { border-bottom: 1px solid rgba(255,255,255,0.1); }
         .menu-trigger { 
             width: 100%; padding: 18px 25px; background: transparent; border: none; 
@@ -42,11 +42,19 @@
             border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; color: #fff; box-sizing: border-box; 
         }
         input::placeholder { color: rgba(255,255,255,0.5); }
+        select option { background: #333; color: #fff; }
         .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; border-radius: 10px; font-weight: bold; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); }
 
-        /* 排行榜與小人動畫 */
+        /* 排行榜與 BMI 指標 */
         .rank-display { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; }
         .rank-card { padding: 20px; display: flex; align-items: center; gap: 15px; position: relative; min-height: 100px; }
+        .p-info { flex: 0 0 160px; }
+        .bmi-tag { font-size: 10px; padding: 2px 6px; border-radius: 4px; margin-left: 5px; vertical-align: middle; font-weight: bold; }
+        .tag-lose { background: rgba(230, 126, 34, 0.3); color: #e67e22; border: 1px solid #e67e22; }
+        .tag-gain { background: rgba(52, 152, 219, 0.3); color: #3498db; border: 1px solid #3498db; }
+        
+        .target-bmi-label { position: absolute; right: 25px; top: 35px; font-size: 11px; color: var(--gold); font-weight: bold; }
+
         .p-track { flex: 1; position: relative; height: 12px; background: rgba(255, 255, 255, 0.1); border-radius: 6px; margin-top: 40px; }
         .p-fill { height: 100%; border-radius: 6px; transition: width 1s ease-in-out; position: absolute; }
         
@@ -83,6 +91,11 @@
                     <input type="text" id="r_name" placeholder="姓名">
                     <input type="number" id="r_h" placeholder="身高(cm)">
                     <input type="number" id="r_w" placeholder="初始體重(kg)">
+                    <select id="r_target_bmi">
+                        <option value="24">目標 BMI 24</option>
+                        <option value="22">目標 BMI 22</option>
+                        <option value="20">目標 BMI 20</option>
+                    </select>
                     <input type="password" id="r_acc" placeholder="設定密碼">
                     <button class="btn-submit" onclick="doRegister()">確認報名</button>
                 </div>
@@ -111,6 +124,39 @@
 </div>
 
 <script>
+    /* 排行榜渲染邏輯已補回 BMI 標籤 */
+    function renderList() {
+        document.getElementById('totalPrize').innerText = `NT$ ${(players.length * 500).toLocaleString()}`;
+        const container = document.getElementById('rankContainer');
+        const sorted = [...players].sort((a,b) => b.progress - a.progress);
+        container.innerHTML = sorted.map((p, i) => {
+            const barW = Math.min(Math.max(p.progress, 0), 100);
+            const color = p.progress >= 80 ? '#27ae60' : (p.progress >= 50 ? '#f39c12' : '#e74c3c');
+            const typeClass = p.target_w < p.initial_w ? 'tag-lose' : 'tag-gain';
+            const typeLabel = p.target_w < p.initial_w ? '減重' : '增重';
+            
+            return `
+                <div class="rank-card">
+                    <div style="flex: 0 0 40px; text-align: center; font-size: 20px; font-weight: 900; color: var(--gold);">${i + 1}</div>
+                    <div class="p-info">
+                        <div style="font-weight:900; font-size:18px;">
+                            ${i === 0 ? '👑 ' : ''}${p.name}
+                            <span class="bmi-tag ${typeClass}">${typeLabel}</span>
+                        </div>
+                        <div style="font-size:10px;color:rgba(255,255,255,0.5);margin-top:4px;">更新: ${p.lastUpdate || '-'}</div>
+                    </div>
+                    <div class="target-bmi-label">目標 BMI: ${p.target_bmi || '??'}</div>
+                    <div class="p-track">
+                        <div class="p-fill" style="width: ${barW}%; background: ${color}; box-shadow: 0 0 10px ${color}55;"></div>
+                        <div class="runner-box" style="left: ${barW}%;">
+                            <span class="runner-percent" style="border-color:${color}">${p.progress}%</span>
+                            <span class="runner-emoji">🏃</span>
+                        </div>
+                    </div>
+                </div>`;
+        }).join('');
+    }
+
     function toggleMenu(id) {
         const target = document.getElementById(id);
         const isOpen = target.classList.contains('active');
@@ -123,8 +169,6 @@
         const btn = document.getElementById('musicToggle');
         if (m.paused) { m.play(); btn.innerText = "🔊"; } else { m.pause(); btn.innerText = "🔇"; }
     }
-
-    // 這裡繼續接你原本的 CONFIG 與 syncFromGitHub 函數邏輯即可
 </script>
 </body>
 </html>
