@@ -6,7 +6,6 @@
     <title>2026Y ASGARD 體態變革者挑戰賽</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        /* 視覺效果完全保留你提供的原始設定 */
         :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #eee; --success: #27ae60; }
         body { 
             font-family: 'PingFang TC', sans-serif; margin: 0; 
@@ -16,10 +15,17 @@
         }
         .main-layout { display: flex; gap: 25px; width: 95%; max-width: 1400px; height: 85vh; align-items: flex-start; }
         
-        .control-panel { flex: 0 0 320px; display: flex; flex-direction: column; gap: 15px; height: 100%; }
+        /* 左側控制面板修正：增加溢出處理 */
+        .control-panel { 
+            flex: 0 0 320px; display: flex; flex-direction: column; gap: 15px; height: 100%; 
+            overflow-y: auto; padding-right: 5px;
+        }
+        /* 隱藏左側控制面板的捲軸但保留滾動功能 */
+        .control-panel::-webkit-scrollbar { width: 0px; background: transparent; }
+
         .glass { 
             background: rgba(30, 30, 30, 0.6); backdrop-filter: blur(15px); border-radius: 20px; 
-            border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; flex-shrink: 0;
         }
         .treasure-header { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; padding: 20px; text-align: center; }
         
@@ -29,7 +35,8 @@
             display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         .menu-content { max-height: 0; overflow: hidden; transition: all 0.4s ease; background: rgba(0,0,0,0.2); }
-        .menu-content.active { max-height: 800px; padding: 15px 20px; } /* 增加高度限制以容納管理清單 */
+        .menu-content.active { max-height: 1200px; padding: 15px 20px; } /* 提高 max-height 以確保不被切掉 */
+        
         input, select { width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; box-sizing: border-box; }
         
         .rank-display { flex: 1; height: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-right: 10px; }
@@ -110,7 +117,7 @@
                         <button style="width:100%; padding:10px; background:#444; color:white; border:none; border-radius:8px; cursor:pointer; margin-bottom:15px;" onclick="savePeriod()">儲存賽期設定</button>
                         
                         <label style="font-size:11px; opacity:0.7; margin-bottom:5px; display:block; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">目前參賽名單：</label>
-                        <div id="adminPlayerList" style="max-height: 250px; overflow-y: auto; margin-bottom: 15px;"></div>
+                        <div id="adminPlayerList" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px;"></div>
                         
                         <button style="width:100%; padding:10px; background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:8px; cursor:pointer;" onclick="doAdminLogout()">登出管理權限</button>
                     </div>
@@ -189,7 +196,6 @@
         }).join('');
     }
 
-    // --- 管理模式清單修正：顯示完整資訊 ---
     function renderAdminList() {
         document.getElementById('adminPlayerList').innerHTML = players.map((p, i) => `
             <div style="background:rgba(0,0,0,0.2); border-radius:8px; padding:8px; margin-bottom:8px; font-size:12px;">
@@ -225,16 +231,15 @@
         location.reload();
     }
 
-    function deletePlayer(i) { if(confirm(`確定要將選手 ${players[i].name} 移除並刪除資料嗎？此操作不可恢復。`)) { players.splice(i,1); pushToGitHub(); } }
+    function deletePlayer(i) { if(confirm(`確定要將選手 ${players[i].name} 移除嗎？`)) { players.splice(i,1); pushToGitHub(); } }
     
     function savePeriod() { 
         period.start = document.getElementById('set_start').value; 
         period.end = document.getElementById('set_end').value; 
-        if(!period.start || !period.end) return alert("請填寫完整賽期日期");
-        pushToGitHub(); alert("賽期已成功更新"); 
+        if(!period.start || !period.end) return alert("請填寫日期");
+        pushToGitHub(); alert("賽期已更新"); 
     }
 
-    // --- 核心互動 ---
     function makeItRain() {
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#f1c40f', '#e67e22', '#ffffff'] });
         const bag = document.getElementById('moneyBag');
@@ -287,7 +292,7 @@
         const acc = document.getElementById('u_acc').value;
         const w = parseFloat(document.getElementById('u_w').value);
         const p = players.find(x => x.name === name && x.acc === acc);
-        if(!p) return alert("姓名或密碼驗證失敗");
+        if(!p) return alert("驗證失敗");
         p.cw = w; p.lastUpdate = new Date().toLocaleString();
         const targetW = p.tbmi * ((p.h/100)*(p.h/100));
         const initialGap = Math.abs(p.sw - targetW);
