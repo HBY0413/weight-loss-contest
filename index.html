@@ -13,22 +13,22 @@
             background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('jpg.jpeg'); 
             background-size: cover; background-attachment: fixed; 
             min-height: 100vh;
-            display: flex; align-items: flex-start; /* 改為頂部對齊，確保內容多時可滑動 */
+            display: flex; align-items: flex-start; 
             justify-content: center; color: var(--text); 
-            overflow-y: auto; /* 允許網頁整體捲動 */
+            overflow-y: auto;
             padding: 20px 0;
         }
         
         .main-layout { 
             display: flex; gap: 25px; width: 95%; max-width: 1400px; 
-            min-height: 85vh; /* 改為最小高度，讓內容能撐開 */
+            min-height: 85vh;
             align-items: flex-start;
         }
         
         .control-panel { 
             flex: 0 0 320px; 
             display: flex; flex-direction: column; gap: 15px; 
-            position: sticky; top: 20px; /* 當右邊滑動時，左邊選單固定住 */
+            position: sticky; top: 20px; 
         }
 
         .glass { 
@@ -45,16 +45,27 @@
             display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        /* 修正選單截斷問題 */
         .menu-content { 
             max-height: 0; overflow: hidden; transition: all 0.3s ease-out; background: rgba(0,0,0,0.2); 
         }
         .menu-content.active { 
-            max-height: 80vh; /* 增加展開高度限制 */
+            max-height: 85vh; 
             overflow-y: auto;  
             padding: 15px 20px; 
             border-bottom: 1px solid rgba(255,255,255,0.1); 
         }
+
+        .formula-box {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+        .formula-box b { color: var(--gold); }
         
         input, select { width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; box-sizing: border-box; }
         
@@ -92,8 +103,13 @@
 
 <div class="main-layout">
     <div class="control-panel">
-        <div class="glass" style="padding: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px;" onclick="toggleMusic()">
-            <span id="musicToggle">🔇</span> <span style="font-size: 13px; font-weight: bold;">點擊開啟背景音樂</span>
+        <div class="glass" style="padding: 12px; cursor: pointer; display: flex; flex-direction: column; gap: 5px;">
+            <div style="display: flex; align-items: center; gap: 10px;" onclick="toggleMusic()">
+                <span id="musicToggle">🔇</span> <span style="font-size: 13px; font-weight: bold;">點擊開啟背景音樂</span>
+            </div>
+            <div id="syncTime" style="font-size: 10px; color: rgba(255,255,255,0.5); padding-left: 28px;">
+                最後同步：等待中...
+            </div>
         </div>
 
         <div class="glass">
@@ -109,6 +125,13 @@
         <div class="glass"> 
             <button class="menu-trigger" onclick="toggleMenu('regForm')">🏃 我要報名參賽 <span>+</span></button>
             <div id="regForm" class="menu-content">
+                <div class="formula-box">
+                    📊 <b>進度計算方式說明：</b><br>
+                    1. <b>目標體重</b> = (身高/100)² × 目標 BMI<br>
+                    2. <b>總需差距</b> = |初始體重 - 目標體重|<br>
+                    3. <b>目前差距</b> = |當前體重 - 目標體重|<br>
+                    4. <b>達成率</b> = (1 - 目前差距 / 總需差距) × 100%
+                </div>
                 <input type="text" id="r_name" placeholder="姓名">
                 <input type="number" id="r_h" placeholder="身高(cm)">
                 <input type="number" id="r_w" placeholder="初始體重(kg)">
@@ -150,7 +173,6 @@
 </div>
 
 <script>
-    // 這裡完全保留你範本中的所有 JavaScript 邏輯
     const CONFIG = {
         token: 'ghp_PIaGwuMrdhwpay' + 'dtVR10V8a8jJYP141vWzNj', 
         owner: 'HBY0413', repo: 'weight-loss-contest', path: 'data.json'
@@ -175,8 +197,11 @@
             const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
             players = content.players || [];
             period = content.period || { start: "", end: "2026-04-13" };
+            
+            // 更新 UI 與同步時間
             renderList();
             updateCountdown();
+            document.getElementById('syncTime').innerText = `最後同步：${new Date().toLocaleString()}`;
             document.getElementById('periodDisplay').innerText = `期間：${period.start || '未設定'} ~ ${period.end}`;
             if(localStorage.getItem('admin_auth') === 'true') renderAdminList();
         } catch (e) { console.error("同步失敗"); }
