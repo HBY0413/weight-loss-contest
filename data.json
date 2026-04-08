@@ -1,15 +1,1 @@
-{
-  "players": [
-    {
-      "name": "黃先生",
-      "h": 172,
-      "sw": 88,
-      "cw": 80,
-      "tbmi": 24,
-      "target": 71,
-      "acc": "ooo",
-      "progress": "47.1",
-      "lastUpdate": "2026-04-08 22:30" 
-    }
-  ]
-}
+{"players":[{"name":"黃先生","h":172,"sw":88,"cw":80,"tbmi":24,"target":71,"acc":"ooo","progress":"47.1","lastUpdate":"2026-04-08 22:30"}],"period":{"start":"2026-05-01","end":"2026-08-31"}}
