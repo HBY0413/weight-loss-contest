@@ -5,33 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2026 減肥戰士 - 獎金爭奪戰</title>
     <style>
-        :root { --primary: #2c3e50; --gold: #f1c40f; --accent: #e67e22; --bg: #fdfaf5; --text: #333; --success: #27ae60; }
+        :root { --primary: #2c3e50; --gold: #f1c40f; --accent: #e67e22; --bg: #fdfaf5; --text: #333; --success: #27ae60; --danger: #e74c3c; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
         .container { max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 15px 50px rgba(0,0,0,0.1); }
         
         /* 獎金看板 */
-        .treasure-header { 
-            background: linear-gradient(135deg, #f39c12, #f1c40f); 
-            color: white; padding: 30px 20px; border-radius: 20px; text-align: center; margin-bottom: 25px;
-        }
+        .treasure-header { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; padding: 25px 20px; border-radius: 20px; text-align: center; margin-bottom: 15px; }
         .treasure-icon { font-size: 50px; display: block; }
         .prize-amount { font-size: 42px; font-weight: 900; }
 
-        /* 排行榜 */
+        /* BMI 參考看板 */
+        .info-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 16px; margin-bottom: 20px; font-size: 13px; }
+        .info-title { font-weight: bold; color: var(--primary); border-bottom: 2px solid #cbd5e0; padding-bottom: 5px; margin-bottom: 10px; display: block; }
+        .bmi-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
+        .bmi-table td { padding: 5px 0; border-bottom: 1px dashed #e2e8f0; }
+        .bmi-val { font-weight: bold; color: var(--accent); }
+
         .rank-card { background: #fff; border: 1px solid #f1f3f5; padding: 18px; border-radius: 16px; margin-bottom: 12px; }
         .progress-bg { background: #edf2f7; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 10px; }
         .progress-bar { background: linear-gradient(90deg, #2ecc71, #27ae60); height: 100%; transition: width 1s; }
-
-        /* 按鈕與表單 */
+        
         .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 12px; transition: 0.3s; }
         .btn-main { background: var(--primary); color: white; }
         .btn-update { background: #edf2f7; color: var(--primary); border: 1px solid #cbd5e0; }
         .btn-sub { background: transparent; color: #a0aec0; font-size: 12px; text-decoration: underline; border: none; margin: 15px auto; display: block; }
-        
         .hidden { display: none; }
-        .form-panel { background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; margin-top: 15px; }
+        .form-panel { background: #fff; padding: 20px; border-radius: 16px; border: 2px solid var(--gold); margin-top: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         input { padding: 12px; border: 1px solid #cbd5e0; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-size: 14px; }
         label { font-size: 12px; color: #666; font-weight: bold; margin-bottom: 5px; display: block; }
+        .highlight-box { background: #fff9db; padding: 10px; border-radius: 8px; font-size: 12px; color: #856404; margin-bottom: 12px; }
     </style>
 </head>
 <body>
@@ -44,6 +46,20 @@
         <div id="participantCount">共 0 人參賽</div>
     </div>
 
+    <div class="info-card">
+        <span class="info-title">📊 BMI 判定基準 (衛福部標準)</span>
+        <table class="bmi-table">
+            <tr><td>體重過輕</td><td class="bmi-val">BMI < 18.5</td></tr>
+            <tr><td>健康體重 (理想)</td><td class="bmi-val" style="color:var(--success);">18.5 ≦ BMI < 24</td></tr>
+            <tr><td>體重過重</td><td class="bmi-val">24 ≦ BMI < 27</td></tr>
+            <tr><td>輕度肥胖</td><td class="bmi-val" style="color:var(--danger);">27 ≦ BMI < 30</td></tr>
+        </table>
+        <div style="margin-top:10px; font-size:11px; color:#666;">
+            公式：BMI = 體重(kg) / 身高(m)² <br>
+            ※ 本賽事最低目標門檻為 BMI 18.5，低於此值將自動調整。
+        </div>
+    </div>
+
     <div id="rankContainer"></div>
 
     <div id="entryButtons">
@@ -54,18 +70,21 @@
 
     <div id="registerForm" class="form-panel hidden">
         <h3>🏃 勇士初次報名</h3>
+        <div class="highlight-box">⚠️ 注意：報名後「身高、初始體重、目標BMI」均不可修改，請謹慎填寫。</div>
         <label>基本資料</label>
         <input type="text" id="reg_name" placeholder="真實姓名">
         <input type="number" id="reg_h" placeholder="身高 (cm)">
         <input type="number" id="reg_cw" placeholder="報名當下體重 (kg)">
-        <label>設定帳號 (更新紀錄時必填驗證)</label>
-        <input type="password" id="reg_acc" placeholder="自訂帳號 (例如生日或密碼)">
-        <button class="btn btn-main" onclick="register()">確認送出報名</button>
+        <label>挑戰目標 BMI (建議 18.5~24)</label>
+        <input type="number" id="reg_tbmi" value="24" step="0.1" placeholder="目標 BMI">
+        <label>設定帳號 (更新時驗證用)</label>
+        <input type="password" id="reg_acc" placeholder="自訂更新帳號 (請務必牢記)">
+        <button class="btn btn-main" onclick="register()">確認送出（報名後不得反悔）</button>
     </div>
 
     <div id="updateForm" class="form-panel hidden">
         <h3>⚖️ 更新本週體重</h3>
-        <label>驗證資訊</label>
+        <label>身分驗證</label>
         <input type="text" id="upd_name" placeholder="您的姓名">
         <input type="password" id="upd_acc" placeholder="您的帳號">
         <label>最新數據</label>
@@ -74,36 +93,33 @@
     </div>
 
     <div id="adminLogin" class="form-panel hidden">
-        <h3>🔐 管理員登入</h3>
-        <input type="password" id="admin_pw" placeholder="請輸入管理密碼">
+        <input type="password" id="admin_pw" placeholder="管理密碼">
         <button class="btn btn-main" onclick="loginAdmin()">登入</button>
     </div>
     <div id="adminPanel" class="form-panel hidden">
-        <h3>📊 數據中心</h3>
         <div style="overflow-x:auto;">
-            <table style="width:100%; font-size:12px; border-collapse: collapse; text-align: left;">
-                <thead>
-                    <tr style="border-bottom: 2px solid #eee;">
-                        <th>姓名</th><th>身高</th><th>初始</th><th>目前</th><th>目標</th><th>操作</th>
-                    </tr>
-                </thead>
+            <table style="width:100%; font-size:11px; text-align: left; border-collapse: collapse;">
+                <thead><tr><th>姓名</th><th>身高</th><th>目標BMI</th><th>初始</th><th>目前</th><th>操作</th></tr></thead>
                 <tbody id="adminList"></tbody>
             </table>
         </div>
-        <button class="btn btn-sub" onclick="logoutAdmin()">登出</button>
+        <button class="btn-sub" onclick="logoutAdmin()">登出</button>
     </div>
 </div>
 
 <script>
     const ADMIN_PW = 'gogofit666';
-    let players = JSON.parse(localStorage.getItem('diet_v6_final')) || [];
+    let players = [];
+    try {
+        const saved = localStorage.getItem('diet_contest_v8_final');
+        players = saved ? JSON.parse(saved) : [];
+    } catch(e) { players = []; }
 
     function togglePanel(panelId) {
-        const panels = ['registerForm', 'updateForm', 'adminLogin', 'adminPanel'];
-        panels.forEach(id => {
-            const target = document.getElementById(id);
-            if (id === panelId) target.classList.toggle('hidden');
-            else target.classList.add('hidden');
+        ['registerForm', 'updateForm', 'adminLogin', 'adminPanel'].forEach(id => {
+            const el = document.getElementById(id);
+            if (id === panelId) el.classList.toggle('hidden');
+            else el.classList.add('hidden');
         });
     }
 
@@ -111,19 +127,25 @@
         const name = document.getElementById('reg_name').value.trim();
         const h = parseFloat(document.getElementById('reg_h').value);
         const cw = parseFloat(document.getElementById('reg_cw').value);
+        let tbmi = parseFloat(document.getElementById('reg_tbmi').value);
         const acc = document.getElementById('reg_acc').value.trim();
 
-        if (!name || !h || !cw || !acc) return alert("請完整填寫！");
+        if (!name || !h || !cw || !tbmi || !acc) return alert("請完整填寫報名表！");
         if (players.some(p => p.name === name)) return alert("此姓名已報名！");
 
-        const target = Math.round(((h / 100) ** 2 * 24) * 10) / 10;
-        // 報名當下：初始體重 (sw) = 目前體重 (cw)
-        const sw = cw; 
-        const progress = 0.0; // 初始進度為 0
+        // 強制執行健康門檻：最低目標不能低於 18.5
+        if (tbmi < 18.5) {
+            alert("為了您的健康，目標 BMI 最低設定為 18.5");
+            tbmi = 18.5;
+        }
 
-        players.push({ name, h, sw, cw, acc, target, progress });
+        const target = Math.round(((h / 100) ** 2 * tbmi) * 10) / 10;
+        const sw = cw;
+        const progress = 0.0;
+
+        players.push({ name, h, sw, cw, acc, tbmi, target, progress });
         saveAndRender();
-        alert("報名成功！");
+        alert(`報名成功！您的目標體重鎖定為 ${target}kg，祝順利奪冠！`);
         togglePanel('none');
     }
 
@@ -132,26 +154,23 @@
         const acc = document.getElementById('upd_acc').value.trim();
         const cw = parseFloat(document.getElementById('upd_cw').value);
 
-        if (!name || !acc || !cw) return alert("請完整填寫驗證資訊！");
-
-        const idx = players.findIndex(p => p.name === name && p.acc === acc);
+        const idx = players.findIndex(p => p.name === name && String(p.acc) === String(acc));
 
         if (idx === -1) {
-            alert("驗證失敗！姓名或帳號不符。");
+            alert("驗證失敗：姓名或帳號錯誤！");
         } else {
             const p = players[idx];
             p.cw = cw;
-            // 進度計算：(初始 - 目前) / (初始 - 目標)
             const calc = ((p.sw - p.cw) / (p.sw - p.target) * 100).toFixed(1);
             p.progress = calc;
             saveAndRender();
-            alert(`更新成功！${name} 目前進度：${p.progress}%`);
+            alert(`更新成功！${name} 目前進度 ${p.progress}%`);
             togglePanel('none');
         }
     }
 
     function saveAndRender() {
-        localStorage.setItem('diet_v6_final', JSON.stringify(players));
+        localStorage.setItem('diet_contest_v8_final', JSON.stringify(players));
         render();
     }
 
@@ -161,7 +180,7 @@
         document.getElementById('totalPrize').innerText = `NT$ ${players.length * 500}`;
         document.getElementById('participantCount').innerText = `共 ${players.length} 人參賽`;
 
-        container.innerHTML = sorted.length ? '' : '<p style="text-align:center; color:#ccc; margin:30px 0;">等待首位報名者...</p>';
+        container.innerHTML = sorted.length ? '' : '<p style="text-align:center; color:#ccc; margin:20px 0;">等待首位戰士加入...</p>';
         sorted.forEach((p, i) => {
             const barWidth = Math.min(Math.max(p.progress, 0), 100);
             container.innerHTML += `
@@ -172,7 +191,7 @@
                     </div>
                     <div class="progress-bg"><div class="progress-bar" style="width:${barWidth}%"></div></div>
                     <div style="display:flex; justify-content:space-between; font-size:11px; color:#999; margin-top:8px;">
-                        <span>目標 BMI: 24</span>
+                        <span>目標 BMI: ${p.tbmi} (${p.target}kg)</span>
                         <span>達標還差: ${(100 - p.progress > 0 ? 100 - p.progress : 0).toFixed(1)}%</span>
                     </div>
                 </div>
@@ -180,40 +199,25 @@
         });
     }
 
+    // 管理邏輯
     function loginAdmin() {
         if (document.getElementById('admin_pw').value === ADMIN_PW) {
             document.getElementById('adminLogin').classList.add('hidden');
             document.getElementById('adminPanel').classList.remove('hidden');
             renderAdmin();
-        } else {
-            alert("密碼錯誤");
-        }
+        } else { alert("密碼錯誤"); }
     }
-
-    function logoutAdmin() {
-        document.getElementById('admin_pw').value = '';
-        togglePanel('none');
-    }
-
+    function logoutAdmin() { togglePanel('none'); }
     function renderAdmin() {
         const list = document.getElementById('adminList');
         list.innerHTML = '';
         players.forEach((p, i) => {
-            list.innerHTML += `
-                <tr style="border-bottom: 1px solid #f4f4f4;">
-                    <td style="padding:10px 0;">${p.name}</td><td>${p.h}</td><td>${p.sw}</td><td>${p.cw}</td><td>${p.target}</td>
-                    <td><button onclick="deletePlayer(${i})" style="color:red; background:none; border:none; cursor:pointer;">刪除</button></td>
-                </tr>
-            `;
+            list.innerHTML += `<tr><td>${p.name}</td><td>${p.h}</td><td>${p.tbmi}</td><td>${p.sw}</td><td>${p.cw}</td>
+            <td><button onclick="deletePlayer(${i})" style="color:red;border:none;background:none;cursor:pointer;">刪除</button></td></tr>`;
         });
     }
-
     function deletePlayer(i) {
-        if (confirm("確定刪除數據？")) {
-            players.splice(i, 1);
-            saveAndRender();
-            renderAdmin();
-        }
+        if (confirm("刪除此數據？")) { players.splice(i, 1); saveAndRender(); renderAdmin(); }
     }
 
     render();
