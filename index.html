@@ -26,7 +26,10 @@
         }
         #moneyBag { display: inline-block; cursor: pointer; animation: bagShake 2.5s infinite ease-in-out; position: relative; user-select: none; z-index: 5; }
         .coin-particle { position: absolute; font-size: 16px; pointer-events: none; z-index: 10; animation: coinFall 1.2s forwards ease-in; }
-        /* ----------------------- */
+        
+        /* --- 音樂按鈕樣式 --- */
+        #musicToggle { cursor: pointer; font-size: 18px; background: rgba(255,255,255,0.25); border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); transition: 0.3s; user-select: none; }
+        #musicToggle:hover { background: rgba(255,255,255,0.4); }
 
         .prize-amount { font-size: 36px; font-weight: 900; }
         .timer-box { background: #1a253a; color: #f1c40f; padding: 12px; font-size: 18px; text-align: center; font-weight: bold; }
@@ -60,14 +63,21 @@
 </head>
 <body>
 
+<audio id="bgMusic" loop>
+    <source src="bgm.mp3" type="audio/mpeg">
+</audio>
+
 <div class="main-layout">
     <div class="control-panel">
         <div class="glass">
             <div class="treasure-header">
-                <div id="moneyBag" onclick="dropCoins()">
-                    <span style="font-size: 40px;">💰</span>
+                <div style="display: flex; align-items: center; justify-content: center; gap: 15px;">
+                    <div id="moneyBag" onclick="dropCoins()">
+                        <span style="font-size: 40px;">💰</span>
+                    </div>
+                    <div id="musicToggle" onclick="toggleMusic(event)">🔇</div>
                 </div>
-                <div style="font-size: 12px; opacity: 0.9;">體態變革者獎金池</div>
+                <div style="font-size: 12px; opacity: 0.9; margin-top: 5px;">體態變革者獎金池</div>
                 <div class="prize-amount" id="totalPrize">NT$ 0</div>
             </div>
             <div id="periodDisplay" style="background: #1a253a; color: #fff; font-size: 11px; text-align: center; padding: 5px; opacity: 0.7;">同步中...</div>
@@ -144,8 +154,19 @@
     let lastSettledDate = ""; 
     let fileSha = "";
 
-    // --- 金幣噴發函式 ---
+    // --- 金幣噴發與音樂啟動 ---
     function dropCoins() {
+        const music = document.getElementById('bgMusic');
+        const toggleIcon = document.getElementById('musicToggle');
+        
+        // 點擊袋子時，若音樂是靜止的則嘗試播放
+        if (music.paused) {
+            music.play().then(() => {
+                music.volume = 0.3;
+                toggleIcon.innerText = "🔊";
+            }).catch(e => console.log("互動以解鎖播放"));
+        }
+
         const bag = document.getElementById('moneyBag');
         if (!bag) return;
         const emojis = ['🪙', '✨', '💰', '💵', '💎'];
@@ -159,6 +180,20 @@
             coin.style.top = '45px';
             container.appendChild(coin);
             setTimeout(() => coin.remove(), 1200);
+        }
+    }
+
+    // --- 音樂開關切換 ---
+    function toggleMusic(event) {
+        event.stopPropagation(); // 阻止觸發金幣噴發
+        const music = document.getElementById('bgMusic');
+        const toggleIcon = document.getElementById('musicToggle');
+        if (music.paused) {
+            music.play();
+            toggleIcon.innerText = "🔊";
+        } else {
+            music.pause();
+            toggleIcon.innerText = "🔇";
         }
     }
 
@@ -352,21 +387,13 @@
         let prog = 0;
 
         if (isLosingWeight) {
-            if (w <= targetW) {
-                prog = 100.0;
-            } else if (w >= p.sw) {
-                prog = 0.0; 
-            } else {
-                prog = ((p.sw - w) / (p.sw - targetW)) * 100;
-            }
+            if (w <= targetW) { prog = 100.0; } 
+            else if (w >= p.sw) { prog = 0.0; } 
+            else { prog = ((p.sw - w) / (p.sw - targetW)) * 100; }
         } else {
-            if (w >= targetW) {
-                prog = 100.0;
-            } else if (w <= p.sw) {
-                prog = 0.0; 
-            } else {
-                prog = ((w - p.sw) / (targetW - p.sw)) * 100;
-            }
+            if (w >= targetW) { prog = 100.0; } 
+            else if (w <= p.sw) { prog = 0.0; } 
+            else { prog = ((w - p.sw) / (targetW - p.sw)) * 100; }
         }
         
         p.progress = prog.toFixed(1); 
@@ -377,8 +404,18 @@
     window.onload = () => { 
         syncFromGitHub(); 
         setInterval(updateCountdown, 1000); 
-        // 設定每 4 秒自動掉金幣增加氣氛
-        setInterval(dropCoins, 4000);
+        // 氣氛用定時掉金幣，但不會觸發音樂
+        setInterval(() => {
+            const emojis = ['🪙', '✨'];
+            const container = document.getElementById('moneyBag').parentElement;
+            const coin = document.createElement('div');
+            coin.className = 'coin-particle';
+            coin.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            coin.style.left = `calc(50% + ${Math.random() * 60 - 30}px)`;
+            coin.style.top = '45px';
+            container.appendChild(coin);
+            setTimeout(() => coin.remove(), 1200);
+        }, 4000);
     };
     setInterval(syncFromGitHub, 60000);
 </script>
