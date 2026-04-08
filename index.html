@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 減肥戰士 - 排名戰鬥版</title>
+    <title>2026 減肥戰士 - 動態衝刺版</title>
     <style>
         :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #333; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --track: #edf2f7; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; margin: 0; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=2000'); background-size: cover; background-attachment: fixed; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
@@ -15,7 +15,7 @@
         .timer-box { background: #1a253a; color: #f1c40f; padding: 12px; font-size: 18px; text-align: center; font-family: 'Courier New', Courier, monospace; font-weight: bold; border-top: 1px solid #333; }
         .rank-display { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-right: 10px; }
         
-        /* 排名卡片優化 */
+        /* 排行榜卡片 */
         .rank-card { background: rgba(255, 255, 255, 0.95); padding: 15px 20px; border-radius: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid rgba(255,255,255,0.5); position: relative; }
         .rank-number { flex: 0 0 40px; text-align: center; font-size: 24px; font-weight: 900; color: var(--primary); }
         .rank-change { font-size: 11px; font-weight: bold; margin-top: -5px; }
@@ -28,11 +28,15 @@
         .p-percent { font-size: 22px; font-weight: 900; }
         .p-track { flex: 1; position: relative; height: 16px; background: var(--track); border-radius: 8px; margin-top: 10px; }
         .p-fill { height: 100%; border-radius: 8px; transition: width 1s, background-color 0.5s; }
-        .runner { position: absolute; top: -38px; transition: left 1s; transform: translateX(-50%) scaleX(-1); font-size: 32px; }
+        
+        /* 跑步跑步起動畫 */
+        .runner { position: absolute; top: -38px; transition: left 1s; transform: translateX(-50%) scaleX(-1); font-size: 32px; animation-name: run-move; animation-iteration-count: infinite; animation-direction: alternate; animation-timing-function: linear; }
         .target-label { position: absolute; right: 0; top: -25px; font-size: 10px; color: var(--accent); font-weight: bold; }
         .update-time { font-size: 10px; color: #999; margin-top: 4px; }
         
-        /* 介面互動 */
+        @keyframes run-move { from { transform: translateX(-50%) scaleX(-1) translateY(0); } to { transform: translateX(-50%) scaleX(-1) translateY(-6px); } }
+        
+        /* 選單與互動 */
         input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
         .menu-trigger { width: 100%; padding: 15px 25px; background: white; border: none; text-align: left; font-size: 15px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; }
         .menu-content { max-height: 0; overflow: hidden; transition: max-height 0.3s; background: #fff; }
@@ -76,7 +80,7 @@
     let players = [];
     let period = { start: "", end: "" };
     let fileSha = "";
-    let localRankMap = {}; // 用於暫存上次排名
+    let localRankMap = {};
 
     async function syncFromGitHub() {
         try {
@@ -86,12 +90,7 @@
             const data = await res.json();
             fileSha = data.sha;
             const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
-            
-            // 重要：在更新數據前，先保存當前畫面上的排名
-            players.sort((a,b) => b.progress - a.progress).forEach((p, index) => {
-                localRankMap[p.name] = index + 1;
-            });
-
+            players.sort((a,b) => b.progress - a.progress).forEach((p, index) => { localRankMap[p.name] = index + 1; });
             players = content.players || [];
             period = content.period || { start: "", end: "" };
             renderList();
@@ -109,97 +108,7 @@
         syncFromGitHub();
     }
 
-    function renderList() {
-        document.getElementById('totalPrize').innerText = `NT$ ${players.length * 500}`;
-        const container = document.getElementById('rankContainer');
-        
-        // 依照進度排序
-        const sorted = [...players].sort((a,b) => b.progress - a.progress);
-        container.innerHTML = sorted.length ? '' : '<div class="glass" style="padding:40px; text-align:center;">等待挑戰者...</div>';
-        
-        sorted.forEach((p, i) => {
-            const currentRank = i + 1;
-            const lastRank = localRankMap[p.name] || currentRank;
-            const diff = lastRank - currentRank; // 正數代表上升 (例如 3名變1名)
-
-            let changeHtml = '<div class="rank-change steady">—</div>';
-            if (diff > 0) changeHtml = `<div class="rank-change up">▲ ${diff}</div>`;
-            else if (diff < 0) changeHtml = `<div class="rank-change down">▼ ${Math.abs(diff)}</div>`;
-
-            const barW = Math.min(Math.max(p.progress, 0), 100);
-            const color = p.progress >= 80 ? '#27ae60' : (p.progress >= 50 ? '#f39c12' : '#e74c3c');
-            
-            container.innerHTML += `
-                <div class="rank-card">
-                    <div class="rank-number">
-                        ${currentRank}
-                        ${changeHtml}
-                    </div>
-                    <div class="p-info">
-                        <div class="p-name">${currentRank === 1 ? '👑 ' : ''}${p.name}</div>
-                        <div class="p-percent" style="color:${color}">${p.progress}%</div>
-                        <div class="update-time">最後更新: ${p.lastUpdate || '-'}</div>
-                    </div>
-                    <div class="p-track">
-                        <div class="target-label">目標 BMI: ${p.tbmi} 🏁</div>
-                        <div class="runner" style="left: ${barW}%">🏃</div>
-                        <div class="p-fill" style="width: ${barW}%; background: ${color};"></div>
-                    </div>
-                </div>`;
-        });
-    }
-
-    function updateCountdown() {
-        const dDisp = document.getElementById('ddayDisplay');
-        if(!period.start) return;
-        const now = new Date();
-        const start = new Date(period.start + " 00:00:00");
-        const end = new Date(period.end + " 23:59:59");
-        let target = now < start ? start : (now <= end ? end : null);
-        let prefix = now < start ? "距開賽還有 " : "剩餘賽程：";
-        
-        if (target) {
-            const diff = target - now;
-            const d = Math.floor(diff / 86400000);
-            const h = Math.floor((diff % 86400000) / 3600000);
-            const m = Math.floor((diff % 3600000) / 60000);
-            const s = Math.floor((diff % 60000) / 1000);
-            dDisp.innerText = `${prefix}${d}D ${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-        } else dDisp.innerText = "賽事已結束";
-    }
-
-    // 基本功能函式
-    function toggleMenu(id) { 
-        const target = document.getElementById(id);
-        const isOpen = target.classList.contains('active');
-        document.querySelectorAll('.menu-content').forEach(el => el.classList.remove('active'));
-        if (!isOpen) target.classList.add('active');
-    }
-    function doRegister() {
-        const name = document.getElementById('r_name').value;
-        const h = parseFloat(document.getElementById('r_h').value);
-        const sw = parseFloat(document.getElementById('r_w').value);
-        const tbmi = parseFloat(document.getElementById('r_target_bmi').value);
-        const acc = document.getElementById('r_acc').value;
-        const targetW = Math.round(((h/100)**2 * tbmi) * 10) / 10;
-        players.push({ name, h, sw, cw: sw, tbmi, target: targetW, acc, progress: 0, lastUpdate: new Date().toLocaleDateString() });
-        pushToGitHub(); toggleMenu('none');
-    }
-    function doUpdate() {
-        const name = document.getElementById('u_name').value;
-        const acc = document.getElementById('u_acc').value;
-        const w = parseFloat(document.getElementById('u_w').value);
-        const p = players.find(x => x.name === name && x.acc === acc);
-        if(!p) return alert("驗證失敗");
-        p.cw = w; p.lastUpdate = new Date().toLocaleString();
-        p.progress = ((p.sw - p.cw) / (p.sw - p.target) * 100).toFixed(1);
-        pushToGitHub(); toggleMenu('none');
-    }
-    function doAdminLogin() { if(document.getElementById('adm_pw').value === 'gogofit666') document.getElementById('adminDataArea').style.display='block'; }
-    function savePeriod() { period.start = document.getElementById('set_start').value; period.end = document.getElementById('set_end').value; pushToGitHub(); }
-
-    window.onload = () => { syncFromGitHub(); setInterval(updateCountdown, 1000); };
-    setInterval(syncFromGitHub, 60000); 
-</script>
-</body>
-</html>
+    // 核心優化：計算動態跑步速度
+    function calculateRunDuration(progress) {
+        const p = parseFloat(progress);
+        // 公式：1.0s - (進度百分比 * 0
