@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 減肥戰士 - 智慧 BMI 換算版</title>
+    <title>2026 ASGARD 減肥戰士</title>
     <style>
         :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #333; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; margin: 0; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=2000'); background-size: cover; background-attachment: fixed; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
@@ -22,8 +22,8 @@
         .rank-number { flex: 0 0 50px; text-align: center; font-size: 24px; font-weight: 900; color: var(--primary); }
         .rank-change { font-size: 11px; font-weight: bold; display: block; margin-top: -2px; }
         .up { color: var(--success); } .down { color: var(--danger); } .steady { color: #999; }
-        .p-info { flex: 0 0 130px; }
-        .p-name { font-weight: 900; font-size: 18px; color: var(--primary); }
+        .p-info { flex: 0 0 145px; } /* 微調寬度以容納標籤 */
+        .p-name { font-weight: 900; font-size: 18px; color: var(--primary); display: flex; align-items: center; flex-wrap: wrap; gap: 4px; }
         .p-track { flex: 1; position: relative; height: 14px; background: rgba(51, 51, 51, 0.15); border-radius: 7px; margin-top: 42px; border: 1px solid rgba(0,0,0,0.05); }
         .p-fill { height: 100%; border-radius: 7px; transition: width 1s ease-in-out; position: absolute; left: 0; top: 0; z-index: 1; }
         .runner-box { position: absolute; top: -54px; transition: left 1s ease-in-out; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; z-index: 5; }
@@ -38,6 +38,10 @@
         .bmi-ref-table { width: 100%; font-size: 11px; border-collapse: collapse; margin: 10px 0; background: #f9f9f9; border-radius: 8px; overflow: hidden; }
         .bmi-ref-table th, .bmi-ref-table td { padding: 8px; border: 1px solid #eee; text-align: center; }
         .bmi-ref-table th { background: #eee; color: #666; }
+        /* 賽制標籤樣式 */
+        .type-tag { font-size: 10px; padding: 1px 5px; border-radius: 4px; font-weight: bold; border: 1px solid; }
+        .tag-lose { color: #e67e22; border-color: #e67e22; background: rgba(230, 126, 34, 0.05); }
+        .tag-gain { color: #3498db; border-color: #3498db; background: rgba(52, 152, 219, 0.05); }
     </style>
 </head>
 <body>
@@ -184,6 +188,7 @@
 
     function calculateRunDuration(progress) {
         const p = parseFloat(progress);
+        if (p <= 0) return "0s"; 
         return Math.max(0.2, Math.min(1.0, 1.0 - (p * 0.008))).toFixed(2);
     }
 
@@ -201,6 +206,15 @@
             if (diff > 0) changeHtml = `<span class="rank-change up">▲ ${diff}</span>`;
             else if (diff < 0) changeHtml = `<span class="rank-change down">▼ ${Math.abs(diff)}</span>`;
 
+            // --- 修改部分：自動判定賽制並生成標籤 ---
+            const hMeter = p.h / 100;
+            const targetW = p.tbmi * (hMeter * hMeter);
+            const isLosing = p.sw > targetW;
+            const typeTag = isLosing 
+                ? `<span class="type-tag tag-lose">減重</span>`
+                : `<span class="type-tag tag-gain">增重</span>`;
+            // -------------------------------------
+
             const barW = Math.min(Math.max(p.progress, 0), 100);
             const color = p.progress >= 80 ? '#27ae60' : (p.progress >= 50 ? '#f39c12' : '#e74c3c');
             
@@ -208,7 +222,7 @@
                 <div class="rank-card">
                     <div class="rank-number">${currentRank}${changeHtml}</div>
                     <div class="p-info">
-                        <div class="p-name">${currentRank === 1 ? '👑 ' : ''}${p.name}</div>
+                        <div class="p-name">${currentRank === 1 ? '👑 ' : ''}${p.name} ${typeTag}</div>
                         <div style="font-size:10px;color:#999;margin-top:5px;">更新: ${p.lastUpdate || '-'}</div>
                     </div>
                     <div class="p-track">
@@ -236,14 +250,10 @@
         else alert("密碼錯誤");
     }
 
-    // 這裡是更新過後的版本：顯示原始體重(sw) ➔ 目前體重(cw)
     function renderAdminList() {
         document.getElementById('adminPlayerList').innerHTML = players.map((p, i) => `
             <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; padding:8px 0; border-bottom:1px solid #eee;">
-                <div>
-                    <b>${p.name}</b> 
-                    <span style="color:#666; margin-left:8px;">(${p.sw}kg ➔ ${p.cw}kg)</span>
-                </div>
+                <div><b>${p.name}</b> <span style="color:#666; margin-left:8px;">(${p.sw}kg ➔ ${p.cw}kg)</span></div>
                 <button onclick="deletePlayer(${i})" style="color:var(--danger); background:none; border:none; cursor:pointer; font-weight:bold; padding:0 5px;">移除</button>
             </div>
         `).join('') || '<div style="text-align:center; padding:10px; color:#999;">尚無參賽者</div>';
@@ -294,11 +304,9 @@
         const acc = document.getElementById('u_acc').value.trim();
         const w = parseFloat(document.getElementById('u_w').value);
         
-        console.log("嘗試驗證姓名:", name, "密碼:", acc);
-        
         const p = players.find(x => x.name === name && x.acc === acc);
         if(!p) {
-            alert("驗證失敗：請檢查姓名與密碼是否與報名時一致。");
+            alert("驗證失敗：請檢查姓名與密碼是否正確。");
             return;
         }
         
@@ -306,18 +314,27 @@
         p.lastUpdate = new Date().toLocaleString();
 
         const hMeter = p.h / 100;
-        const targetW = p.tbmi * (hMeter * hMeter);
-        const initialGap = Math.abs(p.sw - targetW);
-        const currentGap = Math.abs(w - targetW);
+        const targetW = p.tbmi * (hMeter * hMeter); 
+        const isLosingWeight = p.sw > targetW; 
 
         let prog = 0;
-        if (initialGap < 0.1) {
-            prog = 100.0;
+
+        if (isLosingWeight) {
+            if (w <= targetW) {
+                prog = 100.0;
+            } else if (w >= p.sw) {
+                prog = 0.0; 
+            } else {
+                prog = ((p.sw - w) / (p.sw - targetW)) * 100;
+            }
         } else {
-            prog = (1 - (currentGap / initialGap)) * 100;
-            const isLoseWeight = p.sw > targetW;
-            if (isLoseWeight && w > p.sw) prog = -((w - p.sw) / initialGap * 100);
-            if (!isLoseWeight && w < p.sw) prog = -((p.sw - w) / initialGap * 100);
+            if (w >= targetW) {
+                prog = 100.0;
+            } else if (w <= p.sw) {
+                prog = 0.0; 
+            } else {
+                prog = ((w - p.sw) / (targetW - p.sw)) * 100;
+            }
         }
         
         p.progress = prog.toFixed(1); 
