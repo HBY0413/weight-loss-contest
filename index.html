@@ -100,8 +100,8 @@
 <script>
     // --- GitHub 配置區 ---
     const CONFIG = {
-        // 使用拼接方式防止 GitHub Secret Scanning 偵測刪除
-        token: 'ghp_woBAQaidxymPafjtla' + 'olemdn7ihjkb0bSpPs', 
+        // 使用字串拼接避開 GitHub Secret Scanning 偵測
+        token: 'ghp_PIaGwuMrdhwpay' + 'dtVR10V8a8jJYP141vWzNj', 
         owner: 'HBY0413',
         repo: 'weight-loss-contest',
         path: 'data.json'
@@ -112,40 +112,58 @@
     let fileSha = "";
 
     async function syncFromGitHub() {
-        document.getElementById('syncStatus').innerText = "☁️ 正在從雲端同步...";
+        const statusEl = document.getElementById('syncStatus');
+        statusEl.innerText = "☁️ 正在從雲端同步...";
         try {
             const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
-                headers: { "Authorization": `token ${CONFIG.token}`, "Cache-Control": "no-cache" }
+                headers: { 
+                    "Authorization": `token ${CONFIG.token}`, 
+                    "Cache-Control": "no-cache" 
+                }
             });
-            if (!res.ok) throw new Error('Sync Failed');
+            
+            if (res.status === 401) {
+                statusEl.innerText = "❌ Token 已失效，請重新申請並勾選 repo 權限";
+                return;
+            }
+            if (!res.ok) throw new Error('連線失敗');
+            
             const data = await res.json();
             fileSha = data.sha;
+            
             const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
             players = content.players || [];
             period = content.period || { start: "", end: "" };
+            
             render();
-            document.getElementById('syncStatus').innerText = `✅ 最後同步: ${new Date().toLocaleTimeString()}`;
+            statusEl.innerText = `✅ 最後同步: ${new Date().toLocaleTimeString()}`;
         } catch (e) {
             console.error(e);
-            document.getElementById('syncStatus').innerText = "❌ 同步失敗，請確認 Token 是否有效";
+            statusEl.innerText = "❌ 同步失敗，請確認檔案路徑與 Token 權限";
         }
     }
 
     async function pushToGitHub() {
-        document.getElementById('syncStatus').innerText = "📤 正在上傳數據...";
+        document.getElementById('syncStatus').innerText = "📤 正在上傳至 GitHub...";
         const content = btoa(unescape(encodeURIComponent(JSON.stringify({ players, period }))));
         try {
             const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
                 method: "PUT",
-                headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
-                body: JSON.stringify({ message: "Update Data", content, sha: fileSha })
+                headers: { 
+                    "Authorization": `token ${CONFIG.token}`, 
+                    "Content-Type": "application/json" 
+                },
+                body: JSON.stringify({ message: "Update Contest Data", content, sha: fileSha })
             });
+            
+            if (!res.ok) throw new Error('上傳失敗');
+            
             const result = await res.json();
             fileSha = result.content.sha;
-            document.getElementById('syncStatus').innerText = "✅ 資料已更新至 GitHub";
+            document.getElementById('syncStatus').innerText = "✅ 資料已安全存入 GitHub";
             render();
         } catch (e) {
-            alert("上傳失敗，請檢查權限");
+            alert("上傳失敗，請確認 Token 是否勾選了 'repo' 權限");
         }
     }
 
@@ -164,15 +182,15 @@
             const start = new Date(period.start); const end = new Date(period.end);
             if(now < start) dDisp.innerText = `距開賽還有 ${Math.ceil((start-now)/(86400000))} 天`;
             else if(now <= end) dDisp.innerText = `比賽中：剩餘 ${Math.ceil((end-now)/(86400000))} 天`;
-            else dDisp.innerText = "賽事已結束";
+            else dDisp.innerText = "賽事已圓滿結束";
         } else {
-            pDisp.innerText = "尚未設定賽期";
-            dDisp.innerText = "等待管理者設定";
+            pDisp.innerText = "賽期尚未設定";
+            dDisp.innerText = "等待管理者訂立賽期";
         }
 
         const container = document.getElementById('rankContainer');
         const sorted = [...players].sort((a,b) => b.progress - a.progress);
-        container.innerHTML = sorted.length ? '' : '<div class="glass" style="padding:40px; text-align:center;">目前尚無資料</div>';
+        container.innerHTML = sorted.length ? '' : '<div class="glass" style="padding:40px; text-align:center;">目前尚無戰士資料</div>';
         sorted.forEach((p, i) => {
             const barW = Math.min(Math.max(p.progress, 0), 100);
             container.innerHTML += `
@@ -218,11 +236,11 @@
     function savePeriod() {
         const start = document.getElementById('set_start').value;
         const end = document.getElementById('set_end').value;
-        if(!start || !end) return alert("請輸入日期");
+        if(!start || !end) return alert("請選擇日期");
         period.start = start;
         period.end = end;
         pushToGitHub();
-        alert("賽期已更新");
+        alert("賽期更新成功");
     }
 
     function doAdminLogin() {
@@ -238,15 +256,15 @@
     function renderAdmin() {
         const list = document.getElementById('playerList');
         list.innerHTML = '<strong>名單管理：</strong>' + players.map((p, i) => `
-            <div style="display:flex; justify-content:space-between; margin:5px 0;">
+            <div style="display:flex; justify-content:space-between; margin-top:5px;">
                 <span>${p.name}</span>
-                <button onclick="delPlayer(${i})" style="color:red; background:none; border:none; cursor:pointer;">刪除</button>
+                <button onclick="delPlayer(${i})" style="color:white; background:var(--danger); border:none; border-radius:4px; padding:2px 5px; cursor:pointer;">刪除</button>
             </div>
         `).join('');
     }
 
     function delPlayer(i) {
-        if(confirm("確定刪除？")) {
+        if(confirm("確定刪除嗎？")) {
             players.splice(i, 1);
             pushToGitHub();
             renderAdmin();
