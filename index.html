@@ -9,7 +9,7 @@
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
         .container { max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 15px 50px rgba(0,0,0,0.1); }
         
-        /* 寶藏獎金區 */
+        /* 獎金看板 */
         .treasure-header { 
             background: linear-gradient(135deg, #f39c12, #f1c40f); 
             color: white; padding: 30px 20px; border-radius: 20px; text-align: center; margin-bottom: 25px;
@@ -17,21 +17,21 @@
         .treasure-icon { font-size: 50px; display: block; }
         .prize-amount { font-size: 42px; font-weight: 900; }
 
-        /* 個人更新專區 */
-        .personal-zone { background: #fff9db; border: 2px solid #fab005; padding: 15px; border-radius: 16px; margin-bottom: 20px; text-align: center; }
-        
         /* 排行榜 */
         .rank-card { background: #fff; border: 1px solid #f1f3f5; padding: 18px; border-radius: 16px; margin-bottom: 12px; }
         .progress-bg { background: #edf2f7; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 10px; }
         .progress-bar { background: linear-gradient(90deg, #2ecc71, #27ae60); height: 100%; transition: width 1s; }
 
         /* 按鈕與表單 */
-        .btn { width: 100%; padding: 12px; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 12px; transition: 0.3s; }
         .btn-main { background: var(--primary); color: white; }
-        .btn-sub { background: transparent; color: #a0aec0; font-size: 12px; text-decoration: underline; border: none; }
+        .btn-update { background: #edf2f7; color: var(--primary); border: 1px solid #cbd5e0; }
+        .btn-sub { background: transparent; color: #a0aec0; font-size: 12px; text-decoration: underline; border: none; margin: 15px auto; display: block; }
         
         .hidden { display: none; }
-        input { padding: 12px; border: 1px solid #cbd5e0; border-radius: 8px; width: 100%; box-sizing: border-box; margin-bottom: 10px; }
+        .form-panel { background: #f8fafc; padding: 20px; border-radius: 16px; border: 1px solid #e2e8f0; margin-top: 15px; }
+        input { padding: 12px; border: 1px solid #cbd5e0; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-size: 14px; }
+        label { font-size: 12px; color: #666; font-weight: bold; margin-bottom: 5px; display: block; }
     </style>
 </head>
 <body>
@@ -39,82 +39,120 @@
 <div class="container">
     <div class="treasure-header">
         <span class="treasure-icon">💰</span>
-        <div style="font-size: 14px; font-weight: bold;">目前總獎金池</div>
+        <div style="font-size: 14px; font-weight: bold;">當前總獎金池</div>
         <div class="prize-amount" id="totalPrize">NT$ 0</div>
         <div id="participantCount">共 0 人參賽</div>
     </div>
 
-    <div id="personalZone" class="personal-zone hidden">
-        <h3 style="margin:0;">👋 哈囉，<span id="userNameDisplay"></span></h3>
-        <p style="font-size:12px; color:#666;">這是你的專屬更新通道</p>
-        <input type="number" id="update_cw" placeholder="輸入本週體重 (kg)">
-        <button class="btn btn-main" onclick="quickUpdate()">更新我的數據</button>
-    </div>
-
     <div id="rankContainer"></div>
 
-    <div id="publicButtons">
-        <button id="regBtn" class="btn btn-main" onclick="togglePanel('registerForm')">我要報名參賽</button>
-        <button class="btn-sub" style="display:block; margin: 10px auto;" onclick="togglePanel('adminLogin')">管理登入</button>
+    <div id="entryButtons">
+        <button class="btn btn-main" onclick="togglePanel('registerForm')">我要報名參賽</button>
+        <button class="btn btn-update" onclick="togglePanel('updateForm')">更新體重紀錄</button>
+        <button class="btn-sub" onclick="togglePanel('adminLogin')">管理者後台</button>
     </div>
 
-    <div id="registerForm" class="hidden" style="padding:20px; background:#f8fafc; border-radius:15px; margin-top:15px;">
-        <h3>🏃 填寫資料建立帳號</h3>
-        <input type="text" id="reg_name" placeholder="姓名 (報名後不可修改)">
+    <div id="registerForm" class="form-panel hidden">
+        <h3>🏃 勇士初次報名</h3>
+        <label>基本資料</label>
+        <input type="text" id="reg_name" placeholder="真實姓名">
         <input type="number" id="reg_h" placeholder="身高 (cm)">
-        <input type="number" id="reg_sw" placeholder="初始體重 (kg)">
-        <input type="number" id="reg_cw" placeholder="目前體重 (kg)">
-        <button class="btn btn-main" onclick="register()">完成報名</button>
+        <input type="number" id="reg_cw" placeholder="報名當下體重 (kg)">
+        <label>設定帳號 (更新紀錄時必填驗證)</label>
+        <input type="password" id="reg_acc" placeholder="自訂帳號 (例如生日或密碼)">
+        <button class="btn btn-main" onclick="register()">確認送出報名</button>
     </div>
 
-    <div id="adminLogin" class="hidden">... (維持前一版代碼) ...</div>
+    <div id="updateForm" class="form-panel hidden">
+        <h3>⚖️ 更新本週體重</h3>
+        <label>驗證資訊</label>
+        <input type="text" id="upd_name" placeholder="您的姓名">
+        <input type="password" id="upd_acc" placeholder="您的帳號">
+        <label>最新數據</label>
+        <input type="number" id="upd_cw" placeholder="本週量測體重 (kg)">
+        <button class="btn btn-main" style="background:#27ae60;" onclick="handleUpdate()">驗證並更新</button>
+    </div>
+
+    <div id="adminLogin" class="form-panel hidden">
+        <h3>🔐 管理員登入</h3>
+        <input type="password" id="admin_pw" placeholder="請輸入管理密碼">
+        <button class="btn btn-main" onclick="loginAdmin()">登入</button>
+    </div>
+    <div id="adminPanel" class="form-panel hidden">
+        <h3>📊 數據中心</h3>
+        <div style="overflow-x:auto;">
+            <table style="width:100%; font-size:12px; border-collapse: collapse; text-align: left;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #eee;">
+                        <th>姓名</th><th>身高</th><th>初始</th><th>目前</th><th>目標</th><th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="adminList"></tbody>
+            </table>
+        </div>
+        <button class="btn btn-sub" onclick="logoutAdmin()">登出</button>
+    </div>
 </div>
 
 <script>
-    let players = JSON.parse(localStorage.getItem('diet_v4')) || [];
-    let myName = localStorage.getItem('diet_my_name'); // 關鍵：識別身分
+    const ADMIN_PW = 'gogofit666';
+    let players = JSON.parse(localStorage.getItem('diet_v6_final')) || [];
 
-    function init() {
-        if (myName) {
-            document.getElementById('regBtn').classList.add('hidden');
-            document.getElementById('personalZone').classList.remove('hidden');
-            document.getElementById('userNameDisplay').innerText = myName;
-        }
-        render();
+    function togglePanel(panelId) {
+        const panels = ['registerForm', 'updateForm', 'adminLogin', 'adminPanel'];
+        panels.forEach(id => {
+            const target = document.getElementById(id);
+            if (id === panelId) target.classList.toggle('hidden');
+            else target.classList.add('hidden');
+        });
     }
 
     function register() {
-        const name = document.getElementById('reg_name').value;
+        const name = document.getElementById('reg_name').value.trim();
         const h = parseFloat(document.getElementById('reg_h').value);
-        const sw = parseFloat(document.getElementById('reg_sw').value);
         const cw = parseFloat(document.getElementById('reg_cw').value);
+        const acc = document.getElementById('reg_acc').value.trim();
 
-        if (!name || !h || !sw || !cw) return alert("請填全！");
-        
+        if (!name || !h || !cw || !acc) return alert("請完整填寫！");
+        if (players.some(p => p.name === name)) return alert("此姓名已報名！");
+
         const target = Math.round(((h / 100) ** 2 * 24) * 10) / 10;
-        const progress = ((sw - cw) / (sw - target) * 100).toFixed(1);
+        // 報名當下：初始體重 (sw) = 目前體重 (cw)
+        const sw = cw; 
+        const progress = 0.0; // 初始進度為 0
 
-        players.push({ name, h, sw, cw, target, progress });
-        localStorage.setItem('diet_v4', JSON.stringify(players));
-        localStorage.setItem('diet_my_name', name); // 綁定這台裝置
-        
-        location.reload(); // 重新整理以載入個人區域
+        players.push({ name, h, sw, cw, acc, target, progress });
+        saveAndRender();
+        alert("報名成功！");
+        togglePanel('none');
     }
 
-    function quickUpdate() {
-        const newWeight = parseFloat(document.getElementById('update_cw').value);
-        if (!newWeight) return alert("請輸入體重");
+    function handleUpdate() {
+        const name = document.getElementById('upd_name').value.trim();
+        const acc = document.getElementById('upd_acc').value.trim();
+        const cw = parseFloat(document.getElementById('upd_cw').value);
 
-        const idx = players.findIndex(p => p.name === myName);
-        if (idx > -1) {
+        if (!name || !acc || !cw) return alert("請完整填寫驗證資訊！");
+
+        const idx = players.findIndex(p => p.name === name && p.acc === acc);
+
+        if (idx === -1) {
+            alert("驗證失敗！姓名或帳號不符。");
+        } else {
             const p = players[idx];
-            p.cw = newWeight;
-            p.progress = ((p.sw - p.cw) / (p.sw - p.target) * 100).toFixed(1);
-            
-            localStorage.setItem('diet_v4', JSON.stringify(players));
-            alert("更新成功！加油！");
-            render();
+            p.cw = cw;
+            // 進度計算：(初始 - 目前) / (初始 - 目標)
+            const calc = ((p.sw - p.cw) / (p.sw - p.target) * 100).toFixed(1);
+            p.progress = calc;
+            saveAndRender();
+            alert(`更新成功！${name} 目前進度：${p.progress}%`);
+            togglePanel('none');
         }
+    }
+
+    function saveAndRender() {
+        localStorage.setItem('diet_v6_final', JSON.stringify(players));
+        render();
     }
 
     function render() {
@@ -123,21 +161,62 @@
         document.getElementById('totalPrize').innerText = `NT$ ${players.length * 500}`;
         document.getElementById('participantCount').innerText = `共 ${players.length} 人參賽`;
 
-        container.innerHTML = sorted.length ? '' : '<p style="text-align:center; color:#ccc;">等待第一位勇士...</p>';
+        container.innerHTML = sorted.length ? '' : '<p style="text-align:center; color:#ccc; margin:30px 0;">等待首位報名者...</p>';
         sorted.forEach((p, i) => {
+            const barWidth = Math.min(Math.max(p.progress, 0), 100);
             container.innerHTML += `
                 <div class="rank-card">
-                    <div style="display:flex; justify-content:space-between; font-weight:bold;">
-                        <span>${i === 0 ? '👑' : i+1}. ${p.name}</span>
-                        <span style="color:#27ae60;">${p.progress}%</span>
+                    <div style="display:flex; justify-content:space-between; align-items: baseline;">
+                        <span style="font-weight:bold; font-size:18px;">${i === 0 ? '👑 ' : (i+1)+'. '}${p.name}</span>
+                        <span style="color:#27ae60; font-weight:900; font-size:20px;">${p.progress}%</span>
                     </div>
-                    <div class="progress-bg"><div class="progress-bar" style="width:${Math.max(p.progress,0)}%"></div></div>
+                    <div class="progress-bg"><div class="progress-bar" style="width:${barWidth}%"></div></div>
+                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#999; margin-top:8px;">
+                        <span>目標 BMI: 24</span>
+                        <span>達標還差: ${(100 - p.progress > 0 ? 100 - p.progress : 0).toFixed(1)}%</span>
+                    </div>
                 </div>
             `;
         });
     }
 
-    init();
+    function loginAdmin() {
+        if (document.getElementById('admin_pw').value === ADMIN_PW) {
+            document.getElementById('adminLogin').classList.add('hidden');
+            document.getElementById('adminPanel').classList.remove('hidden');
+            renderAdmin();
+        } else {
+            alert("密碼錯誤");
+        }
+    }
+
+    function logoutAdmin() {
+        document.getElementById('admin_pw').value = '';
+        togglePanel('none');
+    }
+
+    function renderAdmin() {
+        const list = document.getElementById('adminList');
+        list.innerHTML = '';
+        players.forEach((p, i) => {
+            list.innerHTML += `
+                <tr style="border-bottom: 1px solid #f4f4f4;">
+                    <td style="padding:10px 0;">${p.name}</td><td>${p.h}</td><td>${p.sw}</td><td>${p.cw}</td><td>${p.target}</td>
+                    <td><button onclick="deletePlayer(${i})" style="color:red; background:none; border:none; cursor:pointer;">刪除</button></td>
+                </tr>
+            `;
+        });
+    }
+
+    function deletePlayer(i) {
+        if (confirm("確定刪除數據？")) {
+            players.splice(i, 1);
+            saveAndRender();
+            renderAdmin();
+        }
+    }
+
+    render();
 </script>
 </body>
 </html>
