@@ -13,9 +13,6 @@
         .prize-amount { font-size: 42px; font-weight: 900; }
         .info-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 16px; margin-bottom: 20px; font-size: 13px; }
         .info-title { font-weight: bold; color: var(--primary); border-bottom: 2px solid #cbd5e0; padding-bottom: 5px; margin-bottom: 10px; display: block; }
-        .bmi-table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        .bmi-table td { padding: 5px 0; border-bottom: 1px dashed #e2e8f0; }
-        .bmi-val { font-weight: bold; color: var(--accent); }
         .rank-card { background: #fff; border: 1px solid #f1f3f5; padding: 18px; border-radius: 16px; margin-bottom: 12px; }
         .progress-bg { background: #edf2f7; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 10px; }
         .progress-bar { background: linear-gradient(90deg, #2ecc71, #27ae60); height: 100%; transition: width 1s; }
@@ -24,11 +21,9 @@
         .btn-update { background: #edf2f7; color: var(--primary); border: 1px solid #cbd5e0; }
         .btn-sub { background: transparent; color: #a0aec0; font-size: 12px; text-decoration: underline; border: none; margin: 15px auto; display: block; }
         .hidden { display: none; }
-        .form-panel { background: #fff; padding: 20px; border-radius: 16px; border: 2px solid var(--gold); margin-top: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .form-panel { background: #fff; padding: 20px; border-radius: 16px; border: 2px solid var(--gold); margin-top: 15px; }
         input { padding: 12px; border: 1px solid #cbd5e0; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-size: 14px; }
         label { font-size: 12px; color: #666; font-weight: bold; margin-bottom: 5px; display: block; }
-        .highlight-box { background: #fff9db; padding: 10px; border-radius: 8px; font-size: 12px; color: #856404; margin-bottom: 12px; }
-        .notice-tag { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 10px; vertical-align: middle; margin-left: 5px; }
     </style>
 </head>
 <body>
@@ -36,22 +31,15 @@
 <div class="container">
     <div class="treasure-header">
         <span class="treasure-icon">💰</span>
-        <div style="font-size: 14px; font-weight: bold;">2026 勇士總獎金池</div>
+        <div style="font-size: 14px; font-weight: bold;">2026 減肥戰士總獎金池</div>
         <div class="prize-amount" id="totalPrize">NT$ 0</div>
         <div id="participantCount">共 0 人參賽</div>
     </div>
 
     <div class="info-card">
-        <span class="info-title">📊 BMI 判定與規範 <span class="notice-tag">每週六日開放更新</span></span>
-        <table class="bmi-table">
-            <tr><td>健康體重 (理想)</td><td class="bmi-val" style="color:var(--success);">18.5 ≦ BMI < 24</td></tr>
-            <tr><td>體重過重</td><td class="bmi-val">24 ≦ BMI < 27</td></tr>
-            <tr><td>輕度肥胖</td><td class="bmi-val" style="color:var(--danger);">27 ≦ BMI < 30</td></tr>
-        </table>
-        <div style="margin-top:10px; font-size:11px; color:#666;">
-            ※ 初始紀錄：報名當下體重。 <br>
-            ※ 更新限制：僅限每週六、日開放數據更新。
-        </div>
+        <span class="info-title">📅 更新規範公告</span>
+        <div>• **更新時段：** 每週六 00:00 至 週日 23:59 全天候開放。</div>
+        <div>• **隱私政策：** 具體體重數據（kg）僅供系統計算，不對外公開。</div>
     </div>
 
     <div id="rankContainer"></div>
@@ -64,22 +52,21 @@
 
     <div id="registerForm" class="form-panel hidden">
         <h3>🏃 勇士初次報名</h3>
-        <div class="highlight-box">注意：報名後數據鎖定不可修改。</div>
         <input type="text" id="reg_name" placeholder="真實姓名">
         <input type="number" id="reg_h" placeholder="身高 (cm)">
-        <input type="number" id="reg_cw" placeholder="報名體重 (kg)">
-        <label>目標 BMI (健康下限 18.5)</label>
+        <input type="number" id="reg_cw" placeholder="初始體重 (kg)">
+        <label>目標 BMI</label>
         <input type="number" id="reg_tbmi" value="24" step="0.1">
         <input type="password" id="reg_acc" placeholder="自訂更新帳號">
         <button class="btn btn-main" onclick="register()">確認報名</button>
     </div>
 
     <div id="updateForm" class="form-panel hidden">
-        <h3>⚖️ 更新體重 (限週六、日)</h3>
+        <h3>⚖️ 更新體重 (限週六、日全天)</h3>
         <input type="text" id="upd_name" placeholder="您的姓名">
         <input type="password" id="upd_acc" placeholder="您的帳號">
         <input type="number" id="upd_cw" placeholder="本週體重 (kg)">
-        <button class="btn btn-main" style="background:#27ae60;" onclick="handleUpdate()">驗證並更新</button>
+        <button class="btn btn-main" style="background:#27ae60;" onclick="handleUpdate()">送出更新</button>
     </div>
 
     <div id="adminLogin" class="form-panel hidden">
@@ -89,7 +76,7 @@
     <div id="adminPanel" class="form-panel hidden">
         <div style="overflow-x:auto;">
             <table style="width:100%; font-size:10px; text-align: left; border-collapse: collapse;">
-                <thead><tr><th>姓名</th><th>目標</th><th>目前</th><th>最後更新日期</th><th>操作</th></tr></thead>
+                <thead><tr><th>姓名</th><th>身高</th><th>目標BMI</th><th>最後更新日期</th><th>操作</th></tr></thead>
                 <tbody id="adminList"></tbody>
             </table>
         </div>
@@ -101,7 +88,7 @@
     const ADMIN_PW = 'gogofit666';
     let players = [];
     try {
-        const saved = localStorage.getItem('diet_2026_v9');
+        const saved = localStorage.getItem('diet_2026_final_v10');
         players = saved ? JSON.parse(saved) : [];
     } catch(e) { players = []; }
 
@@ -120,7 +107,7 @@
         let tbmi = parseFloat(document.getElementById('reg_tbmi').value);
         const acc = document.getElementById('reg_acc').value.trim();
 
-        if (!name || !h || !cw || !tbmi || !acc) return alert("欄位不全！");
+        if (!name || !h || !cw || !tbmi || !acc) return alert("請完整填寫！");
         if (tbmi < 18.5) tbmi = 18.5;
 
         const target = Math.round(((h / 100) ** 2 * tbmi) * 10) / 10;
@@ -129,40 +116,43 @@
 
         players.push({ name, h, sw: cw, cw, acc, tbmi, target, progress: 0.0, lastUpdate });
         saveAndRender();
-        alert(`報名成功！目標：${target}kg`);
+        alert("報名成功！資料已保密存檔。");
         togglePanel('none');
     }
 
     function handleUpdate() {
-        // 檢查日期：0 是週日，6 是週六
-        const day = new Date().getDay();
+        // --- 強制日期檢查 ---
+        const now = new Date();
+        const day = now.getDay(); // 0 是週日, 6 是週六
+
         if (day !== 0 && day !== 6) {
-            alert("目前非更新時間！請於週六或週日再回來記錄。");
-            return;
+            alert("【更新失敗】\n目前的更新時段尚未開放。\n請於週六或週日全天候再行回報數據。");
+            return; // 直接攔截，不往下執行
         }
 
         const name = document.getElementById('upd_name').value.trim();
         const acc = document.getElementById('upd_acc').value.trim();
         const cw = parseFloat(document.getElementById('upd_cw').value);
 
+        if (!name || !acc || isNaN(cw)) return alert("請填寫完整資訊！");
+
         const idx = players.findIndex(p => p.name === name && String(p.acc) === String(acc));
 
         if (idx === -1) {
-            alert("驗證錯誤！");
+            alert("身分驗證失敗：姓名或帳號錯誤！");
         } else {
             const p = players[idx];
-            const now = new Date();
             p.cw = cw;
             p.lastUpdate = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
             p.progress = ((p.sw - p.cw) / (p.sw - p.target) * 100).toFixed(1);
             saveAndRender();
-            alert(`更新成功！${name} 進度：${p.progress}%`);
+            alert(`更新成功！${name} 目前進度 ${p.progress}%`);
             togglePanel('none');
         }
     }
 
     function saveAndRender() {
-        localStorage.setItem('diet_2026_v9', JSON.stringify(players));
+        localStorage.setItem('diet_2026_final_v10', JSON.stringify(players));
         render();
     }
 
@@ -172,7 +162,7 @@
         document.getElementById('totalPrize').innerText = `NT$ ${players.length * 500}`;
         document.getElementById('participantCount').innerText = `共 ${players.length} 人參賽`;
 
-        container.innerHTML = sorted.length ? '' : '<p style="text-align:center; color:#ccc;">等待挑戰者...</p>';
+        container.innerHTML = sorted.length ? '' : '<p style="text-align:center; color:#ccc;">等待勇士加入...</p>';
         sorted.forEach((p, i) => {
             const barWidth = Math.min(Math.max(p.progress, 0), 100);
             container.innerHTML += `
@@ -183,7 +173,7 @@
                     </div>
                     <div class="progress-bg"><div class="progress-bar" style="width:${barWidth}%"></div></div>
                     <div style="display:flex; justify-content:space-between; font-size:11px; color:#999; margin-top:8px;">
-                        <span>目標: ${p.target}kg (BMI ${p.tbmi})</span>
+                        <span>目標 BMI: ${p.tbmi} (體重已加密)</span>
                         <span>最後更新: ${p.lastUpdate}</span>
                     </div>
                 </div>
@@ -203,12 +193,14 @@
         const list = document.getElementById('adminList');
         list.innerHTML = '';
         players.forEach((p, i) => {
-            list.innerHTML += `<tr><td>${p.name}</td><td>${p.target}</td><td>${p.cw}</td><td>${p.lastUpdate}</td>
-            <td><button onclick="deletePlayer(${i})" style="color:red;border:none;background:none;">刪除</button></td></tr>`;
+            list.innerHTML += `<tr style="border-bottom:1px solid #eee;">
+                <td style="padding:8px 0;">${p.name}</td><td>${p.h}</td><td>${p.tbmi}</td><td>${p.lastUpdate}</td>
+                <td><button onclick="deletePlayer(${i})" style="color:red;border:none;background:none;cursor:pointer;">刪除</button></td>
+            </tr>`;
         });
     }
     function deletePlayer(i) {
-        if (confirm("刪除？")) { players.splice(i, 1); saveAndRender(); renderAdmin(); }
+        if (confirm("刪除數據？")) { players.splice(i, 1); saveAndRender(); renderAdmin(); }
     }
 
     render();
