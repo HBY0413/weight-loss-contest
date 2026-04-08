@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 減肥戰士 - 進化版</title>
+    <title>2026 減肥戰士 - 數據追蹤版</title>
     <style>
         :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #333; --success: #27ae60; --danger: #e74c3c; --track: #edf2f7; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; margin: 0; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=2000'); background-size: cover; background-attachment: fixed; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
@@ -26,12 +26,13 @@
         .p-fill { height: 100%; background: linear-gradient(90deg, #2ecc71, #27ae60); border-radius: 8px; transition: width 1s; }
         .runner { position: absolute; top: -38px; transition: left 1s; transform: translateX(-50%) scaleX(-1); font-size: 32px; animation: run-move 0.6s infinite alternate; }
         .target-label { position: absolute; right: 0; top: -25px; font-size: 11px; color: var(--accent); font-weight: bold; white-space: nowrap; }
+        .update-time { font-size: 10px; color: #999; margin-top: 4px; }
         @keyframes run-move { from { transform: translateX(-50%) scaleX(-1) translateY(0); } to { transform: translateX(-50%) scaleX(-1) translateY(-6px); } }
         input, select { width: 100%; padding: 12px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 14px; }
         .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
         .sync-status { font-size: 10px; color: #999; text-align: center; padding: 5px; background: rgba(0,0,0,0.05); }
         .arrow { transition: transform 0.3s; font-size: 12px; }
-        .active .arrow { transform: rotate(180deg); }
+        .active-arrow { transform: rotate(180deg); }
     </style>
 </head>
 <body>
@@ -50,7 +51,7 @@
         </div>
 
         <div class="glass">
-            <div class="menu-item" id="item_bmi">
+            <div class="menu-item">
                 <button class="menu-trigger" onclick="toggleMenu('bmiInfo')">📊 BMI 評估基準 <span class="arrow">▼</span></button>
                 <div id="bmiInfo" class="menu-content active">
                     <table style="width:100%; font-size:13px;">
@@ -59,18 +60,18 @@
                     </table>
                 </div>
             </div>
-            <div class="menu-item" id="item_reg">
+            <div class="menu-item">
                 <button class="menu-trigger" onclick="toggleMenu('regForm')">🏃 我要報名參賽 <span class="arrow">+</span></button>
                 <div id="regForm" class="menu-content">
                     <input type="text" id="r_name" placeholder="真實姓名">
                     <input type="number" id="r_h" placeholder="身高 (cm)">
                     <input type="number" id="r_w" placeholder="初始體重 (kg)">
-                    <label style="font-size: 12px; color: #666; margin-left: 5px;">目標 BMI 設定：</label>
+                    <label style="font-size: 11px; color: #666; padding-left: 4px;">設定您的目標 BMI：</label>
                     <select id="r_target_bmi">
-                        <option value="24">24.0 (健康上限 - 建議)</option>
+                        <option value="24">24.0 (健康上限)</option>
                         <option value="23">23.0 (精實)</option>
                         <option value="22">22.0 (黃金比例)</option>
-                        <option value="21">21.0 (模特身材)</option>
+                        <option value="21">21.0</option>
                         <option value="20">20.0</option>
                         <option value="18.5">18.5 (健康下限)</option>
                     </select>
@@ -78,7 +79,7 @@
                     <button class="btn-submit" onclick="doRegister()">確認報名</button>
                 </div>
             </div>
-            <div class="menu-item" id="item_upd">
+            <div class="menu-item">
                 <button class="menu-trigger" onclick="toggleMenu('updForm')">⚖️ 更新體重記錄 <span class="arrow">+</span></button>
                 <div id="updForm" class="menu-content">
                     <input type="text" id="u_name" placeholder="姓名">
@@ -87,7 +88,7 @@
                     <button class="btn-submit" style="background:var(--success);" onclick="doUpdate()">同步數據到 GitHub</button>
                 </div>
             </div>
-            <div class="menu-item" id="item_admin">
+            <div class="menu-item">
                 <button class="menu-trigger" onclick="toggleMenu('adminPanel')">🔑 管理者與賽期設定 <span class="arrow">+</span></button>
                 <div id="adminPanel" class="menu-content">
                     <div id="adminLoginArea">
@@ -95,10 +96,10 @@
                         <button class="btn-submit" onclick="doAdminLogin()">登入</button>
                     </div>
                     <div id="adminDataArea" style="display:none;">
-                        <label style="font-size:12px;">設定賽期起迄日：</label>
+                        <label style="font-size:12px;">設定賽期：</label>
                         <input type="date" id="set_start">
                         <input type="date" id="set_end">
-                        <button class="btn-submit" style="background:#e67e22;" onclick="savePeriod()">儲存並上傳賽期</button>
+                        <button class="btn-submit" style="background:#e67e22;" onclick="savePeriod()">儲存賽期</button>
                         <div id="playerList" style="font-size:12px; margin-top:10px; border-top:1px solid #eee; padding-top:10px;"></div>
                     </div>
                 </div>
@@ -141,33 +142,39 @@
     }
 
     async function pushToGitHub() {
-        document.getElementById('syncStatus').innerText = "📤 正在儲存至雲端...";
+        document.getElementById('syncStatus').innerText = "📤 正在更新 GitHub...";
         const content = btoa(unescape(encodeURIComponent(JSON.stringify({ players, period }))));
         try {
             const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
                 method: "PUT",
                 headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
-                body: JSON.stringify({ message: "Update Data", content, sha: fileSha })
+                body: JSON.stringify({ message: "Data Update", content, sha: fileSha })
             });
             const result = await res.json();
             fileSha = result.content.sha;
-            document.getElementById('syncStatus').innerText = "✅ 同步成功";
+            document.getElementById('syncStatus').innerText = "✅ 已完成雲端同步";
             render();
-        } catch (e) { alert("儲存失敗"); }
+        } catch (e) { alert("同步失敗"); }
     }
 
-    // 修正摺疊邏輯：點擊同一個選單會收合
     function toggleMenu(id) {
         const target = document.getElementById(id);
         const isOpen = target.classList.contains('active');
-        document.querySelectorAll('.menu-content').forEach(el => el.classList.remove('active'));
-        if (!isOpen) target.classList.add('active');
+        document.querySelectorAll('.menu-content').forEach(el => {
+            el.classList.remove('active');
+            el.previousElementSibling.querySelector('.arrow').classList.remove('active-arrow');
+        });
+        if (!isOpen) {
+            target.classList.add('active');
+            target.previousElementSibling.querySelector('.arrow').classList.add('active-arrow');
+        }
     }
 
     function render() {
         document.getElementById('totalPrize').innerText = `NT$ ${players.length * 500}`;
         const dDisp = document.getElementById('ddayDisplay');
         const pDisp = document.getElementById('periodDisplay');
+        
         if(period.start && period.end) {
             pDisp.innerText = `期間：${period.start} ~ ${period.end}`;
             const now = new Date(); now.setHours(0,0,0,0);
@@ -179,7 +186,8 @@
 
         const container = document.getElementById('rankContainer');
         const sorted = [...players].sort((a,b) => b.progress - a.progress);
-        container.innerHTML = sorted.length ? '' : '<div class="glass" style="padding:40px; text-align:center;">目前尚無參賽者數據</div>';
+        container.innerHTML = sorted.length ? '' : '<div class="glass" style="padding:40px; text-align:center;">等待首位戰士報名...</div>';
+        
         sorted.forEach((p, i) => {
             const barW = Math.min(Math.max(p.progress, 0), 100);
             container.innerHTML += `
@@ -187,6 +195,7 @@
                     <div class="p-info">
                         <div class="p-name">${i === 0 ? '👑 ' : ''}${p.name}</div>
                         <div class="p-percent">${p.progress}%</div>
+                        <div class="update-time">最後更新: ${p.lastUpdate || '初始數據'}</div>
                     </div>
                     <div class="p-track">
                         <div class="target-label">目標 BMI: ${p.tbmi || 24} 🏁</div>
@@ -202,12 +211,18 @@
         const name = document.getElementById('r_name').value;
         const h = parseFloat(document.getElementById('r_h').value);
         const sw = parseFloat(document.getElementById('r_w').value);
-        const tbmi = parseFloat(document.getElementById('r_target_bmi').value); // 優化 3：取得自訂 BMI
+        const tbmi = parseFloat(document.getElementById('r_target_bmi').value);
         const acc = document.getElementById('r_acc').value;
         if(!name || !h || !sw || !acc) return alert("請填寫完整資訊");
         
         const targetW = Math.round(((h/100)**2 * tbmi) * 10) / 10;
-        players.push({ name, h, sw, cw: sw, tbmi, target: targetW, acc, progress: 0 });
+        const now = new Date();
+        const timeStr = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+        
+        players.push({ 
+            name, h, sw, cw: sw, tbmi, target: targetW, acc, progress: 0, 
+            lastUpdate: timeStr 
+        });
         pushToGitHub();
         toggleMenu('regForm');
     }
@@ -218,8 +233,12 @@
         const w = parseFloat(document.getElementById('u_w').value);
         const p = players.find(x => x.name === name && x.acc === acc);
         if(!p) return alert("姓名或密碼錯誤");
+        
+        const now = new Date();
+        p.lastUpdate = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
         p.cw = w;
         p.progress = ((p.sw - p.cw) / (p.sw - p.target) * 100).toFixed(1);
+        
         pushToGitHub();
         toggleMenu('updForm');
     }
@@ -236,21 +255,22 @@
         const list = document.getElementById('playerList');
         list.innerHTML = '<strong>管理名單：</strong>' + players.map((p, i) => `
             <div style="display:flex; justify-content:space-between; margin-top:5px;">
-                <span>${p.name} (目標BMI: ${p.tbmi})</span>
+                <span>${p.name} (目標: ${p.tbmi})</span>
                 <button onclick="delPlayer(${i})" style="color:white; background:var(--danger); border:none; border-radius:4px; padding:2px 5px; cursor:pointer;">刪除</button>
             </div>
         `).join('');
     }
 
     function delPlayer(i) {
-        if(confirm("確定刪除嗎？")) { players.splice(i, 1); pushToGitHub(); renderAdmin(); }
+        if(confirm("確定刪除此數據？")) { players.splice(i, 1); pushToGitHub(); renderAdmin(); }
     }
 
     function savePeriod() {
         period.start = document.getElementById('set_start').value;
         period.end = document.getElementById('set_end').value;
+        if(!period.start || !period.end) return alert("請選擇日期");
         pushToGitHub();
-        alert("賽期已更新");
+        alert("賽期更新成功");
     }
 
     window.onload = syncFromGitHub;
