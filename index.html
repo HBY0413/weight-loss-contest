@@ -3,27 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 減肥戰士 - 進度修正旗艦版</title>
+    <title>2026 減肥戰士 - 功能優化版</title>
     <style>
         :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #333; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --track: #edf2f7; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; margin: 0; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=2000'); background-size: cover; background-attachment: fixed; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
         
         .main-layout { display: flex; gap: 30px; width: 95%; max-width: 1200px; height: 90vh; align-items: flex-start; }
         
-        /* 選單佈局：確保穩定不消失 */
-        .control-panel { flex: 0 0 380px; display: flex; flex-direction: column; gap: 15px; max-height: 100%; overflow-y: auto; padding-right: 5px; }
-        .control-panel::-webkit-scrollbar { width: 4px; }
-        .control-panel::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); }
+        /* --- 左側工具列版型修正 --- */
+        .control-panel { 
+            flex: 0 0 380px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            max-height: 90vh; /* 限制最高不超過螢幕 */
+            overflow-y: auto; /* 內容過長時顯示捲動條 */
+            padding-right: 8px;
+            padding-bottom: 20px;
+        }
+        /* 客製化捲動條外觀 */
+        .control-panel::-webkit-scrollbar { width: 5px; }
+        .control-panel::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 10px; }
 
-        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; border: 1px solid rgba(255,255,255,0.3); }
+        .glass { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); overflow: hidden; border: 1px solid rgba(255,255,255,0.3); flex-shrink: 0; }
         .treasure-header { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; padding: 20px; text-align: center; }
         .prize-amount { font-size: 36px; font-weight: 900; }
         .timer-box { background: #1a253a; color: #f1c40f; padding: 12px; font-size: 18px; text-align: center; font-weight: bold; }
         
+        /* 右側排行榜佈局 */
         .rank-display { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-right: 10px; }
         .rank-card { background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid rgba(255,255,255,0.5); position: relative; }
-        
-        /* 排名與變化 */
         .rank-number { flex: 0 0 50px; text-align: center; font-size: 24px; font-weight: 900; color: var(--primary); }
         .rank-change { font-size: 11px; font-weight: bold; display: block; margin-top: -2px; }
         .up { color: var(--success); } .down { color: var(--danger); } .steady { color: #999; }
@@ -31,29 +40,21 @@
         .p-info { flex: 0 0 130px; }
         .p-name { font-weight: 900; font-size: 18px; color: var(--primary); }
 
-        /* 進度條修復：紅框位置修正 */
+        /* 進度條修復 */
         .p-track { flex: 1; position: relative; height: 18px; background: var(--track); border-radius: 9px; margin-top: 25px; border: 1px solid #eee; }
         .p-fill { height: 100%; border-radius: 8px; transition: width 1s; position: absolute; left: 0; top: 0; }
-        
-        /* 小人與百分比跟隨 */
         .runner-box { position: absolute; top: -42px; transition: left 1s; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; }
         .runner-emoji { font-size: 30px; transform: scaleX(-1); animation: bounce 0.5s infinite alternate linear; }
         .runner-percent { font-size: 12px; font-weight: 900; margin-top: -2px; white-space: nowrap; }
 
         @keyframes bounce { from { transform: scaleX(-1) translateY(0); } to { transform: scaleX(-1) translateY(-5px); } }
 
-        .target-label { position: absolute; right: 0; top: -22px; font-size: 10px; color: var(--accent); font-weight: bold; }
-        
-        /* 選單樣式 */
-        input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; }
+        /* 表單元素 */
         .menu-trigger { width: 100%; padding: 15px 25px; background: white; border: none; text-align: left; font-size: 15px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; }
         .menu-content { max-height: 0; overflow: hidden; transition: max-height 0.4s; background: #fff; }
         .menu-content.active { max-height: 1000px; padding: 20px; }
         .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
-
-        /* 管理者面板樣式 */
-        .admin-list-box { margin-top: 15px; background: #f8f9fa; border-radius: 10px; padding: 10px; border: 1px dashed #ccc; }
-        .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 13px; }
+        input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 14px; }
     </style>
 </head>
 <body>
@@ -83,7 +84,7 @@
                         <option value="22">目標 BMI 22</option>
                         <option value="20">目標 BMI 20</option>
                     </select>
-                    <input type="password" id="r_acc" placeholder="密碼">
+                    <input type="password" id="r_acc" placeholder="建立更新體重用密碼">
                     <button class="btn-submit" onclick="doRegister()">確認報名</button>
                 </div>
             </div>
@@ -101,11 +102,12 @@
                 <div id="adminPanel" class="menu-content">
                     <input type="password" id="adm_pw" placeholder="管理密碼">
                     <button class="btn-submit" onclick="doAdminLogin()">登入管理後台</button>
-                    <div id="adminDataArea" style="display:none; margin-top:15px;">
+                    <div id="adminDataArea" style="display:none; margin-top:15px; padding-top:10px; border-top:1px dashed #ccc;">
+                        <label style="font-size:12px; color:#666;">賽期設定：</label>
                         <input type="date" id="set_start">
                         <input type="date" id="set_end">
                         <button class="btn-submit" onclick="savePeriod()" style="background:#444;">儲存賽期</button>
-                        <div class="admin-list-box" id="adminPlayerList"></div>
+                        <div id="adminPlayerList" style="margin-top:10px;"></div>
                     </div>
                 </div>
             </div>
@@ -134,7 +136,6 @@
             fileSha = data.sha;
             const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
             
-            // 處理排名變化
             const oldRankMap = {...localRankMap};
             players.sort((a,b) => b.progress - a.progress).forEach((p, i) => { localRankMap[p.name] = i + 1; });
             
@@ -153,7 +154,7 @@
         await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
             method: "PUT",
             headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ message: "Update", content, sha: fileSha })
+            body: JSON.stringify({ message: "Update Data", content, sha: fileSha })
         });
         syncFromGitHub();
     }
@@ -183,7 +184,7 @@
                         <div style="font-size:10px;color:#999;margin-top:5px;">更新: ${p.lastUpdate || '-'}</div>
                     </div>
                     <div class="p-track">
-                        <div class="target-label">目標 BMI: ${p.tbmi} 🏁</div>
+                        <div style="position:absolute; right:0; top:-22px; font-size:10px; color:var(--accent); font-weight:bold;">目標 BMI: ${p.tbmi} 🏁</div>
                         <div class="p-fill" style="width: ${barW}%; background: ${color};"></div>
                         <div class="runner-box" style="left: ${barW}%;">
                             <span class="runner-emoji">🏃</span>
@@ -192,6 +193,19 @@
                     </div>
                 </div>`;
         });
+    }
+
+    function toggleMenu(id) {
+        const target = document.getElementById(id);
+        const isOpen = target.classList.contains('active');
+        document.querySelectorAll('.menu-content').forEach(el => {
+            el.classList.remove('active');
+            el.style.maxHeight = "0";
+        });
+        if (!isOpen) {
+            target.classList.add('active');
+            target.style.maxHeight = "800px";
+        }
     }
 
     function doAdminLogin() {
@@ -204,38 +218,22 @@
     function renderAdminList() {
         const listArea = document.getElementById('adminPlayerList');
         listArea.innerHTML = players.map((p, i) => `
-            <div class="admin-item">
+            <div style="display:flex; justify-content:space-between; font-size:13px; padding:5px 0; border-bottom:1px solid #eee;">
                 <span><b>${p.name}</b> (${p.cw}kg)</span>
-                <div>
-                    <button onclick="editPlayer(${i})" style="color:var(--warning);background:none;border:none;cursor:pointer;">修改</button>
-                    <button onclick="deletePlayer(${i})" style="color:var(--danger);background:none;border:none;cursor:pointer;margin-left:10px;">剔除</button>
-                </div>
+                <button onclick="deletePlayer(${i})" style="color:red; background:none; border:none; cursor:pointer;">移除</button>
             </div>
         `).join('') || '尚無參賽者';
     }
 
     function deletePlayer(i) {
-        if(confirm(`確定移除「${players[i].name}」嗎？`)) {
-            players.splice(i, 1);
-            pushToGitHub();
-        }
-    }
-
-    function editPlayer(i) {
-        const p = players[i];
-        const newSw = prompt(`修改「${p.name}」初始體重：`, p.sw);
-        if(newSw !== null) {
-            p.sw = parseFloat(newSw);
-            p.progress = ((p.sw - p.cw) / (p.sw - p.target) * 100).toFixed(1);
-            pushToGitHub();
-        }
+        if(confirm(`確定移除「${players[i].name}」？`)) { players.splice(i, 1); pushToGitHub(); }
     }
 
     function savePeriod() {
         period.start = document.getElementById('set_start').value;
         period.end = document.getElementById('set_end').value;
         pushToGitHub();
-        alert("賽期已更新");
+        alert("賽期已儲存");
     }
 
     function updateCountdown() {
@@ -256,13 +254,6 @@
             const s = Math.floor((diff % 60000) / 1000).toString().padStart(2,'0');
             dDisp.innerText = `${prefix}${d}D ${h}:${m}:${s}`;
         } else dDisp.innerText = "本期已結束";
-    }
-
-    function toggleMenu(id) {
-        const target = document.getElementById(id);
-        const isOpen = target.classList.contains('active');
-        document.querySelectorAll('.menu-content').forEach(el => el.classList.remove('active'));
-        if (!isOpen) target.classList.add('active');
     }
 
     function doRegister() {
@@ -289,7 +280,6 @@
     }
 
     window.onload = () => { syncFromGitHub(); setInterval(updateCountdown, 1000); };
-    setInterval(syncFromGitHub, 60000); 
 </script>
 </body>
 </html>
