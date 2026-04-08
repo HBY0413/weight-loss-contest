@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 減肥戰士 - 數據追蹤版</title>
+    <title>2026 減肥戰士 - 彩色進度版</title>
     <style>
-        :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #333; --success: #27ae60; --danger: #e74c3c; --track: #edf2f7; }
+        :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #333; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --track: #edf2f7; }
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; margin: 0; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=2000'); background-size: cover; background-attachment: fixed; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
         .main-layout { display: flex; gap: 30px; width: 95%; max-width: 1200px; height: 85vh; }
         .control-panel { flex: 0 0 380px; display: flex; flex-direction: column; gap: 15px; }
@@ -21,9 +21,12 @@
         .rank-card { background: rgba(255, 255, 255, 0.95); padding: 15px 20px; border-radius: 20px; display: flex; align-items: center; gap: 20px; border: 1px solid rgba(255,255,255,0.5); }
         .p-info { flex: 0 0 140px; }
         .p-name { font-weight: 900; font-size: 18px; color: var(--primary); }
-        .p-percent { font-size: 24px; color: var(--success); font-weight: 900; }
+        .p-percent { font-size: 24px; color: var(--text); font-weight: 900; }
         .p-track { flex: 1; position: relative; height: 16px; background: var(--track); border-radius: 8px; }
-        .p-fill { height: 100%; background: linear-gradient(90deg, #2ecc71, #27ae60); border-radius: 8px; transition: width 1s; }
+        
+        /* 修正重點：移除原本固定的背景色，改由 JS 動態賦予 */
+        .p-fill { height: 100%; border-radius: 8px; transition: width 1s, background-color 0.5s; }
+        
         .runner { position: absolute; top: -38px; transition: left 1s; transform: translateX(-50%) scaleX(-1); font-size: 32px; animation: run-move 0.6s infinite alternate; }
         .target-label { position: absolute; right: 0; top: -25px; font-size: 11px; color: var(--accent); font-weight: bold; white-space: nowrap; }
         .update-time { font-size: 10px; color: #999; margin-top: 4px; }
@@ -71,7 +74,7 @@
                         <option value="24">24.0 (健康上限)</option>
                         <option value="23">23.0 (精實)</option>
                         <option value="22">22.0 (黃金比例)</option>
-                        <option value="21">21.0</option>
+                        <option value=" model" value="21">21.0</option>
                         <option value="20">20.0</option>
                         <option value="18.5">18.5 (健康下限)</option>
                     </select>
@@ -170,6 +173,14 @@
         }
     }
 
+    // 修正重點：新增顏色判斷邏輯
+    function getProgressColor(progress) {
+        const p = parseFloat(progress);
+        if (p >= 80) return 'linear-gradient(90deg, #2ecc71, #27ae60)'; // 綠色
+        if (p >= 50) return 'linear-gradient(90deg, #f39c12, #e67e22)'; // 橘色
+        return 'linear-gradient(90deg, #e74c3c, #c0392b)';             // 紅色
+    }
+
     function render() {
         document.getElementById('totalPrize').innerText = `NT$ ${players.length * 500}`;
         const dDisp = document.getElementById('ddayDisplay');
@@ -190,17 +201,20 @@
         
         sorted.forEach((p, i) => {
             const barW = Math.min(Math.max(p.progress, 0), 100);
+            // 修正重點：呼叫顏色判斷函式
+            const barColor = getProgressColor(p.progress); 
+            
             container.innerHTML += `
                 <div class="rank-card">
                     <div class="p-info">
                         <div class="p-name">${i === 0 ? '👑 ' : ''}${p.name}</div>
-                        <div class="p-percent">${p.progress}%</div>
+                        <div class="p-percent" style="background: ${barColor}; -webkit-background-clip: text; -webkit-text-fill-color: transparent;">${p.progress}%</div>
                         <div class="update-time">最後更新: ${p.lastUpdate || '初始數據'}</div>
                     </div>
                     <div class="p-track">
                         <div class="target-label">目標 BMI: ${p.tbmi || 24} 🏁</div>
                         <div class="runner" style="left: ${barW}%">🏃</div>
-                        <div class="p-fill" style="width: ${barW}%"></div>
+                        <div class="p-fill" style="width: ${barW}%; background: ${barColor};"></div>
                     </div>
                 </div>
             `;
