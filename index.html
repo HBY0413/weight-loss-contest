@@ -103,12 +103,13 @@
 
 <div class="main-layout">
     <div class="control-panel">
-        <div class="glass" style="padding: 12px; cursor: pointer; display: flex; flex-direction: column; gap: 5px;">
-            <div style="display: flex; align-items: center; gap: 10px;" onclick="toggleMusic()">
-                <span id="musicToggle">🔇</span> <span style="font-size: 13px; font-weight: bold;">點擊開啟背景音樂</span>
+        <div class="glass" style="padding: 12px; cursor: pointer; display: flex; flex-direction: column; gap: 5px;" onclick="syncFromGitHub()">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span id="musicToggle" onclick="event.stopPropagation(); toggleMusic()">🔇</span> 
+                <span style="font-size: 13px; font-weight: bold;">資料每分鐘自動同步 🔄</span>
             </div>
             <div id="syncTime" style="font-size: 10px; color: rgba(255,255,255,0.5); padding-left: 28px;">
-                最後同步：等待中...
+                最後同步：等待中... (點擊可立即整理)
             </div>
         </div>
 
@@ -185,7 +186,6 @@
 
     async function syncFromGitHub() {
         try {
-            // 修正：先抓取資料再計算舊排名
             const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}?t=${Date.now()}`, {
                 headers: { "Authorization": `token ${CONFIG.token}` }
             });
@@ -193,18 +193,17 @@
             fileSha = data.sha;
             const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
             
-            // 在更新本地數據前，先紀錄目前的排名狀況做為「舊排名」
+            // 紀錄舊排名
             const currentSorted = [...players].sort((a, b) => b.progress - a.progress);
             prevRankMap = {};
             currentSorted.forEach((p, index) => { prevRankMap[p.name] = index + 1; });
 
-            // 更新數據
             players = content.players || [];
             period = content.period || { start: "", end: "2026-04-13" };
             
             renderList();
             updateCountdown();
-            document.getElementById('syncTime').innerText = `最後同步：${new Date().toLocaleString()}`;
+            document.getElementById('syncTime').innerText = `最後同步：${new Date().toLocaleTimeString()} (點擊可立即整理)`;
             document.getElementById('periodDisplay').innerText = `期間：${period.start || '未設定'} ~ ${period.end}`;
             if(localStorage.getItem('admin_auth') === 'true') renderAdminList();
         } catch (e) { console.error("同步失敗", e); }
@@ -348,9 +347,7 @@
         try {
             btn.disabled = true; btn.innerText = "處理中...";
             await syncFromGitHub();
-            // 防止重複報名
             if(players.some(p => p.name === name)) throw new Error("該姓名已存在，請使用其他名稱");
-            
             players.push({ name, h, sw, cw: sw, tbmi, acc, progress: 0, lastUpdate: new Date().toLocaleString() });
             await pushToGitHub();
             alert("報名成功！");
@@ -367,22 +364,15 @@
         if(!name || !acc || isNaN(w)) return alert("請輸入完整的更新資訊");
         try {
             btn.disabled = true; btn.innerText = "數據計算中...";
-            await syncFromGitHub(); // 更新前先抓取最新 SHA 與數據
-            
+            await syncFromGitHub();
             const p = players.find(x => x.name === name && x.acc === acc);
             if(!p) throw new Error("驗證失敗：姓名或密碼不正確");
-            
             p.cw = w; 
             p.lastUpdate = new Date().toLocaleString();
-            
-            // 重新計算進度
             const targetW = p.tbmi * ((p.h/100)*(p.h/100));
             const initialGap = Math.abs(p.sw - targetW);
             const currentGap = Math.abs(w - targetW);
-            
-            // 計算百分比並寫入
             p.progress = initialGap === 0 ? 100 : Math.max(0, ((1 - (currentGap / initialGap)) * 100)).toFixed(1);
-            
             await pushToGitHub();
             alert(`🎉 ${name} 的體重數據已同步成功！`);
             toggleMenu('updForm');
@@ -390,9 +380,14 @@
         finally { btn.disabled = false; btn.innerText = "同步數據"; }
     }
 
+    // 初始化與輪詢
     window.onload = () => {
         syncFromGitHub();
-        setInterval(updateCountdown, 1000);
+        
+        // --- 設定不重新整理也自動更新 ---
+        setInterval(syncFromGitHub, 60000); // 每 60 秒自動背景同步一次數據
+        setInterval(updateCountdown, 1000); // 倒數計時每秒更新一次
+        
         if(localStorage.getItem('admin_auth') === 'true') showAdminUI();
     };
 </script>
