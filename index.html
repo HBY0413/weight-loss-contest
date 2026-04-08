@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 減肥戰士 - 動畫加速旗艦版</title>
+    <title>2026 減肥戰士 - 最終視覺優化版</title>
     <style>
-        :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #333; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --track: #edf2f7; }
+        :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #333; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; }
         
         body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; margin: 0; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=2000'); background-size: cover; background-attachment: fixed; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
         
         .main-layout { display: flex; gap: 30px; width: 95%; max-width: 1200px; height: 90vh; align-items: flex-start; }
         
-        /* 工具列捲動修正 */
+        /* 左側工具列 */
         .control-panel { flex: 0 0 380px; display: flex; flex-direction: column; gap: 15px; max-height: 85vh; overflow-y: auto; padding-right: 10px; padding-bottom: 30px; }
         .control-panel::-webkit-scrollbar { width: 5px; }
         .control-panel::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 10px; }
@@ -21,6 +21,7 @@
         .prize-amount { font-size: 36px; font-weight: 900; }
         .timer-box { background: #1a253a; color: #f1c40f; padding: 12px; font-size: 18px; text-align: center; font-weight: bold; }
         
+        /* 排行榜卡片 */
         .rank-display { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-right: 10px; }
         .rank-card { background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid rgba(255,255,255,0.5); position: relative; }
         .rank-number { flex: 0 0 50px; text-align: center; font-size: 24px; font-weight: 900; color: var(--primary); }
@@ -30,18 +31,28 @@
         .p-info { flex: 0 0 130px; }
         .p-name { font-weight: 900; font-size: 18px; color: var(--primary); }
 
-        /* 進度條佈局 */
-        .p-track { flex: 1; position: relative; height: 14px; background: var(--track); border-radius: 7px; margin-top: 40px; border: 1px solid #eee; }
+        /* --- 進度條底色修正：#333333 + 透明度 --- */
+        .p-track { 
+            flex: 1; 
+            position: relative; 
+            height: 14px; 
+            background: rgba(51, 51, 51, 0.15); /* #333333 的 rgba 形式，設定 15% 透明度 */
+            border-radius: 7px; 
+            margin-top: 42px; 
+            border: 1px solid rgba(0,0,0,0.05); 
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); /* 增加一點內陰影質感 */
+        }
+        
         .p-fill { height: 100%; border-radius: 7px; transition: width 1s ease-in-out; position: absolute; left: 0; top: 0; z-index: 1; }
         
-        /* 🏃 小人容器：動畫時間將由 JS 動態注入 */
-        .runner-box { position: absolute; top: -52px; transition: left 1s ease-in-out; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; z-index: 5; }
-        .runner-emoji { font-size: 30px; transform: scaleX(-1); line-height: 1; /* 動畫名稱已定義，時間將由 JS 控制 */ animation-name: bounce; animation-iteration-count: infinite; animation-direction: alternate; animation-timing-function: linear; }
+        /* 🏃 小人與百分比容器 */
+        .runner-box { position: absolute; top: -54px; transition: left 1s ease-in-out; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; z-index: 5; }
+        .runner-emoji { font-size: 30px; transform: scaleX(-1); line-height: 1; animation-name: bounce; animation-iteration-count: infinite; animation-direction: alternate; animation-timing-function: linear; }
         .runner-percent { font-size: 12px; font-weight: 900; background: rgba(255,255,255,0.9); padding: 1px 6px; border-radius: 10px; margin-bottom: -2px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-        /* 定義跳動動畫 */
-        @keyframes bounce { from { transform: scaleX(-1) translateY(0); } to { transform: scaleX(-1) translateY(-6px); /* 稍微調高一點跳躍幅度 */ } }
+        @keyframes bounce { from { transform: scaleX(-1) translateY(0); } to { transform: scaleX(-1) translateY(-6px); } }
 
+        /* 表單元素 */
         .menu-trigger { width: 100%; padding: 15px 25px; background: white; border: none; text-align: left; font-size: 15px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; }
         .menu-content { max-height: 0; overflow: hidden; transition: max-height 0.4s; background: #fff; }
         .menu-content.active { max-height: 1000px; padding: 20px; }
@@ -74,9 +85,9 @@
                     <input type="number" id="r_w" placeholder="初始體重(kg)">
                     <label>請選擇目標 BMI：</label>
                     <select id="r_target_bmi">
-                        <option value="24">目標 BMI 24 (標準)</option>
-                        <option value="22">目標 BMI 22 (理想)</option>
-                        <option value="20">目標 BMI 20 (精實)</option>
+                        <option value="24">目標 BMI 24</option>
+                        <option value="22">目標 BMI 22</option>
+                        <option value="20">目標 BMI 20</option>
                     </select>
                     <input type="password" id="r_acc" placeholder="建立更新體重用密碼">
                     <button class="btn-submit" onclick="doRegister()">確認報名</button>
@@ -153,11 +164,9 @@
         syncFromGitHub();
     }
 
-    // 🏆 計算動畫速度的函式
-    // 百分比越高，時間越短 (越快)
+    // 動態計算動畫跳動速度
     function calculateRunDuration(progress) {
         const p = parseFloat(progress);
-        // 公式：1.0s - (百分比 * 0.008)，並限制在 0.2s 到 1.0s 之間
         const duration = 1.0 - (p * 0.008); 
         return Math.max(0.2, Math.min(1.0, duration)).toFixed(2);
     }
@@ -178,11 +187,8 @@
 
             const barW = Math.min(Math.max(p.progress, 0), 100);
             const color = p.progress >= 80 ? '#27ae60' : (p.progress >= 50 ? '#f39c12' : '#e74c3c');
-
-            // 🏆 計算此參賽者的動畫時間
             const runDuration = calculateRunDuration(p.progress);
 
-            // 修正：將百分比文字移到小人上方，並動態注入動畫時間
             container.innerHTML += `
                 <div class="rank-card">
                     <div class="rank-number">${currentRank}${changeHtml}</div>
@@ -193,7 +199,6 @@
                     <div class="p-track">
                         <div style="position:absolute; right:0; top:-28px; font-size:10px; color:var(--accent); font-weight:bold;">目標 BMI: ${p.tbmi} 🏁</div>
                         <div class="p-fill" style="width: ${barW}%; background: ${color};"></div>
-                        
                         <div class="runner-box" style="left: ${barW}%;">
                             <span class="runner-percent" style="color:${color}">${p.progress}%</span>
                             <span class="runner-emoji" style="animation-duration: ${runDuration}s;">🏃</span>
