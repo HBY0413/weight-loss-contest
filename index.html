@@ -3,34 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 減肥戰士 - 獎金爭奪戰</title>
+    <title>2026 減肥戰士 - 勇往直前</title>
     <style>
-        :root { --primary: #2c3e50; --gold: #f1c40f; --accent: #e67e22; --bg: #fdfaf5; --text: #333; --success: #27ae60; --danger: #e74c3c; }
-        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 15px; }
-        .container { max-width: 600px; margin: auto; background: white; padding: 25px; border-radius: 24px; box-shadow: 0 15px 50px rgba(0,0,0,0.1); }
-        .treasure-header { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; padding: 25px 20px; border-radius: 20px; text-align: center; margin-bottom: 15px; }
-        .treasure-icon { font-size: 50px; display: block; }
-        .prize-amount { font-size: 42px; font-weight: 900; }
+        :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #333; --success: #27ae60; --danger: #e74c3c; --track: #edf2f7; }
         
-        /* BMI 資訊卡片 */
-        .info-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 18px; border-radius: 16px; margin-bottom: 20px; font-size: 13px; }
+        body { 
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
+            margin: 0; 
+            padding: 15px;
+            /* 勵志背景圖：晨曦中的攀登者 */
+            background-image: url('https://images.unsplash.com/photo-1519810755548-39cd217da494?q=80&w=2000');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed; /* 固定背景 */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        /* 主容器：磨砂玻璃特效 */
+        .container { 
+            max-width: 600px; 
+            margin: auto; 
+            background: rgba(255, 255, 255, 0.85); /* 半透明白 */
+            backdrop-filter: blur(10px); /* 模糊背景 */
+            -webkit-backdrop-filter: blur(10px);
+            padding: 30px 25px; 
+            border-radius: 30px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2); 
+            border: 1px solid rgba(255,255,255,0.3);
+            box-sizing: border-box;
+        }
+        
+        /* 獎金看板 */
+        .treasure-header { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; padding: 25px 20px; border-radius: 20px; text-align: center; margin-bottom: 20px; box-shadow: 0 8px 20px rgba(243,156,18,0.3); }
+        .treasure-icon { font-size: 50px; display: block; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.2)); }
+        .prize-amount { font-size: 48px; font-weight: 900; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        
+        /* 資訊卡片 */
+        .info-card { background: rgba(248, 250, 252, 0.7); border: 1px solid #e2e8f0; padding: 18px; border-radius: 16px; margin-bottom: 20px; font-size: 13px; color: var(--text); }
         .info-title { font-weight: bold; color: var(--primary); border-bottom: 2px solid #cbd5e0; padding-bottom: 8px; margin-bottom: 12px; display: block; font-size: 15px; }
         .bmi-table { width: 100%; border-collapse: collapse; }
-        .bmi-table td { padding: 8px 0; border-bottom: 1px dashed #e2e8f0; }
+        .bmi-table td { padding: 8px 0; border-bottom: 1px dashed #cbd5e0; }
         .bmi-val { font-weight: bold; color: var(--accent); text-align: right; }
         
-        .rank-card { background: #fff; border: 1px solid #f1f3f5; padding: 18px; border-radius: 16px; margin-bottom: 12px; }
-        .progress-bg { background: #edf2f7; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 10px; }
-        .progress-bar { background: linear-gradient(90deg, #2ecc71, #27ae60); height: 100%; transition: width 1s; }
-        .btn { width: 100%; padding: 14px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 12px; transition: 0.3s; }
-        .btn-main { background: var(--primary); color: white; }
-        .btn-update { background: #edf2f7; color: var(--primary); border: 1px solid #cbd5e0; }
-        .btn-sub { background: transparent; color: #a0aec0; font-size: 12px; text-decoration: underline; border: none; margin: 15px auto; display: block; }
+        /* 排行榜卡片 */
+        .rank-card { background: rgba(255, 255, 255, 0.9); border: 1px solid #f1f3f5; padding: 20px; border-radius: 18px; margin-bottom: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.03); }
+        
+        /* ✨ 動態跑道進度條設計 */
+        .progress-track { background: var(--track); height: 20px; border-radius: 10px; overflow: visible; margin-top: 15px; position: relative; border: 1px solid #cbd5e0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        .progress-fill { background: linear-gradient(90deg, #2ecc71, #27ae60); height: 100%; border-radius: 10px; transition: width 1s ease-in-out; position: relative; }
+        
+        /* 🏁 終點旗幟 */
+        .progress-track::after { content: '🏁'; position: absolute; right: -10px; top: -22px; font-size: 18px; filter: drop-shadow(0 2px 2px rgba(0,0,0,0.2)); }
+
+        /* 🏃 跑步小人容器 */
+        .runner-container { position: absolute; top: -35px; /* 位於跑道上方 */ transform: translateX(-50%); /* 確保小人中心點對齊進度 */ transition: left 1s ease-in-out; }
+        
+        /* 跑步小人 Emoji */
+        .runner-emoji { font-size: 26px; filter: drop-shadow(0 3px 3px rgba(0,0,0,0.3)); animation: run-bob 0.6s infinite alternate ease-in-out; display: inline-block; }
+
+        /* 小人上下微微跳動動畫 */
+        @keyframes run-bob { 0% { transform: translateY(0px) rotate(-5deg); } 100% { transform: translateY(-4px) rotate(5deg); } }
+        
+        /* 排行榜資訊細節 */
+        .player-header { display:flex; justify-content:space-between; align-items: baseline; }
+        .player-name { font-weight:bold; font-size:18px; color:var(--primary); }
+        .player-percent { color:var(--success); font-weight:900; font-size:24px; text-shadow: 0 1px 1px rgba(0,0,0,0.05); }
+        .player-sub-info { display:flex; justify-content:space-between; font-size:11px; color:#7f8c8d; margin-top:10px; }
+
+        /* 按鈕與表單 */
+        .btn { width: 100%; padding: 15px; border: none; border-radius: 12px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 15px; transition: 0.2s; box-sizing: border-box; }
+        .btn-main { background: var(--primary); color: white; box-shadow: 0 5px 15px rgba(26,37,58,0.2); }
+        .btn-main:active { transform: scale(0.98); }
+        .btn-update { background: rgba(237, 242, 247, 0.8); color: var(--primary); border: 1px solid #cbd5e0; }
+        .btn-sub { background: transparent; color: rgba(255,255,255,0.8); font-size: 13px; text-decoration: underline; border: none; margin: 20px auto; display: block; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+        
         .hidden { display: none; }
-        .form-panel { background: #fff; padding: 20px; border-radius: 16px; border: 2px solid var(--gold); margin-top: 15px; }
-        input { padding: 12px; border: 1px solid #cbd5e0; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-size: 14px; }
-        label { font-size: 12px; color: #666; font-weight: bold; margin-bottom: 5px; display: block; }
-        .notice-tag { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; float: right; }
+        .form-panel { background: rgba(255, 255, 255, 0.95); padding: 25px; border-radius: 20px; border: 2px solid var(--gold); margin-top: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        input { padding: 14px; border: 1px solid #cbd5e0; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 15px; font-size: 15px; background: rgba(255,255,255,0.8); }
+        label { font-size: 12px; color: #555; font-weight: bold; margin-bottom: 6px; display: block; }
+        .notice-tag { background: #e74c3c; color: white; padding: 3px 10px; border-radius: 6px; font-size: 11px; float: right; }
+        @media (max-width: 480px) { .prize-amount { font-size: 36px; } .container { padding: 20px 15px; } }
     </style>
 </head>
 <body>
@@ -38,23 +92,21 @@
 <div class="container">
     <div class="treasure-header">
         <span class="treasure-icon">💰</span>
-        <div style="font-size: 14px; font-weight: bold;">2026 減肥戰士總獎金池</div>
+        <div style="font-size: 15px; font-weight: bold;">2026 減肥戰士總獎金池</div>
         <div class="prize-amount" id="totalPrize">NT$ 0</div>
-        <div id="participantCount">共 0 人參賽</div>
+        <div id="participantCount" style="font-size:14px; opacity:0.9;">共 0 人參賽</div>
     </div>
 
     <div class="info-card">
         <span class="info-title">📊 BMI 評估基準 <span class="notice-tag">六日開放更新</span></span>
         <table class="bmi-table">
-            <tr><td>體重過輕</td><td class="bmi-val">BMI < 18.5</td></tr>
             <tr><td>健康體重 (理想範圍)</td><td class="bmi-val" style="color:var(--success);">18.5 ≦ BMI < 24</td></tr>
             <tr><td>體重過重</td><td class="bmi-val">24 ≦ BMI < 27</td></tr>
             <tr><td>輕度肥胖</td><td class="bmi-val" style="color:var(--danger);">27 ≦ BMI < 30</td></tr>
         </table>
-        <div style="margin-top:12px; font-size:11px; color:#666; line-height: 1.5;">
-            • <b>計算公式：</b>體重(kg) / 身高(m)² <br>
-            • <b>隱私保護：</b>具體公斤數已加密，僅以進度百分比呈現。 <br>
-            • <b>健康門檻：</b>參賽目標不可低於 BMI 18.5。
+        <div style="margin-top:12px; font-size:11px; color:#666; line-height: 1.6;">
+            • **隱私政策：** 具體體重已加密，僅以百分比呈現。 <br>
+            • **健康門檻：** 參賽目標不可低於 BMI 18.5。
         </div>
     </div>
 
@@ -63,26 +115,27 @@
     <div id="entryButtons">
         <button class="btn btn-main" onclick="togglePanel('registerForm')">我要報名參賽</button>
         <button class="btn btn-update" onclick="togglePanel('updateForm')">更新體重紀錄 (限六日)</button>
-        <button class="btn-sub" onclick="togglePanel('adminLogin')">管理者後台</button>
     </div>
+    
+    <button class="btn-sub" onclick="togglePanel('adminLogin')">管理者後台</button>
 
     <div id="registerForm" class="form-panel hidden">
-        <h3>🏃 勇士初次報名</h3>
+        <h3 style="margin-top:0; color:var(--primary);">🏃 勇士初次報名</h3>
         <input type="text" id="reg_name" placeholder="真實姓名">
         <input type="number" id="reg_h" placeholder="身高 (cm)">
         <input type="number" id="reg_cw" placeholder="初始體重 (kg)">
-        <label>自訂目標 BMI (健康下限 18.5)</label>
+        <label>自訂目標 BMI (最低 18.5)</label>
         <input type="number" id="reg_tbmi" value="24" step="0.1">
-        <input type="password" id="reg_acc" placeholder="自訂更新帳號">
-        <button class="btn btn-main" onclick="register()">確認報名</button>
+        <input type="password" id="reg_acc" placeholder="自訂更新帳號 (請牢記)">
+        <button class="btn btn-main" onclick="register()">確認報名，開始挑戰</button>
     </div>
 
     <div id="updateForm" class="form-panel hidden">
-        <h3>⚖️ 更新體重 (限週六、日全天)</h3>
+        <h3 style="margin-top:0; color:var(--success);">⚖️ 更新體重 (限週六、日)</h3>
         <input type="text" id="upd_name" placeholder="您的姓名">
         <input type="password" id="upd_acc" placeholder="您的帳號">
         <input type="number" id="upd_cw" placeholder="本週體重 (kg)">
-        <button class="btn btn-main" style="background:#27ae60;" onclick="handleUpdate()">送出更新</button>
+        <button class="btn btn-main" style="background:var(--success);" onclick="handleUpdate()">送出更新</button>
     </div>
 
     <div id="adminLogin" class="form-panel hidden">
@@ -91,12 +144,12 @@
     </div>
     <div id="adminPanel" class="form-panel hidden">
         <div style="overflow-x:auto;">
-            <table style="width:100%; font-size:10px; text-align: left; border-collapse: collapse;">
+            <table style="width:100%; font-size:11px; text-align: left; border-collapse: collapse;">
                 <thead><tr><th>姓名</th><th>身高</th><th>目標BMI</th><th>最後更新日期</th><th>操作</th></tr></thead>
                 <tbody id="adminList"></tbody>
             </table>
         </div>
-        <button class="btn-sub" onclick="logoutAdmin()">登出</button>
+        <button class="btn btn-sub" style="color:var(--danger);" onclick="logoutAdmin()">登出</button>
     </div>
 </div>
 
@@ -104,7 +157,8 @@
     const ADMIN_PW = 'gogofit666';
     let players = [];
     try {
-        const saved = localStorage.getItem('diet_2026_final_v11');
+        // 使用新版本 Key，確保視覺更新不干擾舊數據
+        const saved = localStorage.getItem('diet_2026_visual_v13');
         players = saved ? JSON.parse(saved) : [];
     } catch(e) { players = []; }
 
@@ -114,6 +168,11 @@
             if (id === panelId) el.classList.toggle('hidden');
             else el.classList.add('hidden');
         });
+        if(panelId !== 'none' && !document.getElementById(panelId).classList.contains('hidden')){
+            setTimeout(() => {
+                document.getElementById(panelId).scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+        }
     }
 
     function register() {
@@ -132,7 +191,7 @@
 
         players.push({ name, h, sw: cw, cw, acc, tbmi, target, progress: 0.0, lastUpdate });
         saveAndRender();
-        alert("報名成功！資料已隱私加密處理。");
+        alert("報名成功！踏上跑道，準備出發！");
         togglePanel('none');
     }
 
@@ -141,7 +200,7 @@
         const day = now.getDay(); 
 
         if (day !== 0 && day !== 6) {
-            alert("【更新失敗】\n目前的更新時段尚未開放。\n請於週六或週日全天候再行回報數據。");
+            alert("【更新失敗】\n未到數據回報日。\n請於週六或週日再來記錄。");
             return;
         }
 
@@ -154,20 +213,24 @@
         const idx = players.findIndex(p => p.name === name && String(p.acc) === String(acc));
 
         if (idx === -1) {
-            alert("身分驗證失敗：姓名或帳號錯誤！");
+            alert("身分驗證失敗！");
         } else {
             const p = players[idx];
             p.cw = cw;
             p.lastUpdate = `${now.getFullYear()}/${now.getMonth()+1}/${now.getDate()}`;
-            p.progress = ((p.sw - p.cw) / (p.sw - p.target) * 100).toFixed(1);
+            if(p.sw === p.target){
+                p.progress = 100.0;
+            } else {
+                p.progress = ((p.sw - p.cw) / (p.sw - p.target) * 100).toFixed(1);
+            }
             saveAndRender();
-            alert(`更新成功！${name} 目前進度 ${p.progress}%`);
+            alert(`更新成功！${name} 目前進度 ${p.progress}%，跑起來！`);
             togglePanel('none');
         }
     }
 
     function saveAndRender() {
-        localStorage.setItem('diet_2026_final_v11', JSON.stringify(players));
+        localStorage.setItem('diet_2026_visual_v13', JSON.stringify(players));
         render();
     }
 
@@ -177,18 +240,24 @@
         document.getElementById('totalPrize').innerText = `NT$ ${players.length * 500}`;
         document.getElementById('participantCount').innerText = `共 ${players.length} 人參賽`;
 
-        container.innerHTML = sorted.length ? '' : '<p style="text-align:center; color:#ccc;">等待挑戰者報名...</p>';
+        container.innerHTML = sorted.length ? '' : '<p style="text-align:center; color:#555; margin:40px 0; background:rgba(255,255,255,0.5); padding:10px; border-radius:10px;">準備就緒，鳴槍出發！🏃</p>';
         sorted.forEach((p, i) => {
             const barWidth = Math.min(Math.max(p.progress, 0), 100);
             container.innerHTML += `
                 <div class="rank-card">
-                    <div style="display:flex; justify-content:space-between; align-items: baseline;">
-                        <span style="font-weight:bold; font-size:18px;">${i === 0 ? '👑 ' : (i+1)+'. '}${p.name}</span>
-                        <span style="color:#27ae60; font-weight:900; font-size:20px;">${p.progress}%</span>
+                    <div class="player-header">
+                        <span class="player-name">${i === 0 ? '👑 ' : (i+1)+'. '}${p.name}</span>
+                        <span class="player-percent">${p.progress}%</span>
                     </div>
-                    <div class="progress-bg"><div class="progress-bar" style="width:${barWidth}%"></div></div>
-                    <div style="display:flex; justify-content:space-between; font-size:11px; color:#999; margin-top:8px;">
-                        <span>目標 BMI: ${p.tbmi} (體重已隱藏)</span>
+                    <div class="progress-track">
+                        <div class="progress-fill" style="width:${barWidth}%">
+                            <div class="runner-container" style="left:${barWidth}%;">
+                                <span class="runner-emoji">🏃</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="player-sub-info">
+                        <span>目標 BMI: ${p.tbmi}</span>
                         <span>最後更新: ${p.lastUpdate}</span>
                     </div>
                 </div>
@@ -196,6 +265,7 @@
         });
     }
 
+    // 管理者邏輯維持
     function loginAdmin() {
         if (document.getElementById('admin_pw').value === ADMIN_PW) {
             document.getElementById('adminLogin').classList.add('hidden');
@@ -209,8 +279,8 @@
         list.innerHTML = '';
         players.forEach((p, i) => {
             list.innerHTML += `<tr style="border-bottom:1px solid #eee;">
-                <td style="padding:8px 0;">${p.name}</td><td>${p.h}</td><td>${p.tbmi}</td><td>${p.lastUpdate}</td>
-                <td><button onclick="deletePlayer(${i})" style="color:red;border:none;background:none;cursor:pointer;">刪除</button></td>
+                <td style="padding:10px 0;">${p.name}</td><td>${p.h}</td><td>${p.tbmi}</td><td>${p.lastUpdate}</td>
+                <td><button onclick="deletePlayer(${i})" style="color:var(--danger);border:none;background:none;cursor:pointer;padding:0;">刪除</button></td>
             </tr>`;
         });
     }
