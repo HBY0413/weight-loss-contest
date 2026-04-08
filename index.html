@@ -15,13 +15,12 @@
         }
         .main-layout { display: flex; gap: 25px; width: 95%; max-width: 1400px; height: 85vh; align-items: flex-start; }
         
-        /* 左側控制面板修正：增加溢出處理 */
+        /* 控制面板優化：增加內部滾動與彈性 */
         .control-panel { 
             flex: 0 0 320px; display: flex; flex-direction: column; gap: 15px; height: 100%; 
-            overflow-y: auto; padding-right: 5px;
+            overflow-y: auto; scrollbar-width: none; /* Firefox */
         }
-        /* 隱藏左側控制面板的捲軸但保留滾動功能 */
-        .control-panel::-webkit-scrollbar { width: 0px; background: transparent; }
+        .control-panel::-webkit-scrollbar { display: none; /* Chrome/Safari */ }
 
         .glass { 
             background: rgba(30, 30, 30, 0.6); backdrop-filter: blur(15px); border-radius: 20px; 
@@ -34,16 +33,14 @@
             text-align: left; font-size: 16px; font-weight: bold; cursor: pointer; color: #fff;
             display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05);
         }
-        .menu-content { max-height: 0; overflow: hidden; transition: all 0.4s ease; background: rgba(0,0,0,0.2); }
-        .menu-content.active { max-height: 1200px; padding: 15px 20px; } /* 提高 max-height 以確保不被切掉 */
+        .menu-content { max-height: 0; overflow: hidden; transition: all 0.3s ease-out; background: rgba(0,0,0,0.2); }
+        .menu-content.active { max-height: 1000px; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         
         input, select { width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; box-sizing: border-box; }
         
         .rank-display { flex: 1; height: 100%; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-right: 10px; }
-        .rank-card { 
-            padding: 20px; display: flex; align-items: center; gap: 20px; position: relative; 
-            min-height: 100px; background: rgba(40, 40, 40, 0.5) !important;
-        }
+        .rank-card { padding: 20px; display: flex; align-items: center; gap: 20px; position: relative; min-height: 100px; background: rgba(40, 40, 40, 0.5) !important; }
+        
         .p-track { flex: 1; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; position: relative; margin-top: 40px; }
         .p-fill { height: 100%; border-radius: 6px; transition: width 1s ease-in-out; position: absolute; }
         
@@ -51,10 +48,12 @@
         .runner-emoji { font-size: 28px; animation: bounce linear infinite alternate; }
         @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
         
-        .bmi-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold; border: 1px solid; }
+        /* BMI 標籤樣式 */
+        .bmi-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold; border: 1px solid; vertical-align: middle; }
         .tag-lose { background: rgba(230, 126, 34, 0.2); color: #e67e22; border-color: #e67e22; }
         .tag-gain { background: rgba(52, 152, 219, 0.2); color: #3498db; border-color: #3498db; }
-        
+        .target-bmi-label { position: absolute; right: 0; top: -20px; font-size: 11px; color: var(--gold); opacity: 0.8; font-weight: bold; }
+
         .rank-display::-webkit-scrollbar, #adminPlayerList::-webkit-scrollbar { width: 6px; }
         .rank-display::-webkit-scrollbar-thumb, #adminPlayerList::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 10px; }
     </style>
@@ -110,14 +109,14 @@
                         <input type="password" id="adm_pw" placeholder="管理者密鑰">
                         <button style="width:100%; padding:12px; background:var(--accent); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doAdminLogin()">進入管理模式</button>
                     </div>
-                    <div id="adminDataArea" style="display:none; margin-top:10px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
-                        <label style="font-size:11px; opacity:0.7; margin-bottom:5px; display:block;">賽期設定：</label>
+                    <div id="adminDataArea" style="display:none; margin-top:10px;">
+                        <label style="font-size:11px; opacity:0.7;">賽期設定：</label>
                         <input type="date" id="set_start">
                         <input type="date" id="set_end">
                         <button style="width:100%; padding:10px; background:#444; color:white; border:none; border-radius:8px; cursor:pointer; margin-bottom:15px;" onclick="savePeriod()">儲存賽期設定</button>
                         
-                        <label style="font-size:11px; opacity:0.7; margin-bottom:5px; display:block; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">目前參賽名單：</label>
-                        <div id="adminPlayerList" style="max-height: 300px; overflow-y: auto; margin-bottom: 15px;"></div>
+                        <label style="font-size:11px; opacity:0.7;">目前參賽名單：</label>
+                        <div id="adminPlayerList" style="max-height: 250px; overflow-y: auto; margin-bottom: 15px;"></div>
                         
                         <button style="width:100%; padding:10px; background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:8px; cursor:pointer;" onclick="doAdminLogout()">登出管理權限</button>
                     </div>
@@ -178,7 +177,7 @@
             return `
                 <div class="glass rank-card">
                     <div style="font-size: 24px; font-weight: 900; color: var(--gold); width: 30px;">${i + 1}</div>
-                    <div class="p-info">
+                    <div class="p-info" style="flex: 0 0 150px;">
                         <div style="font-size: 18px; font-weight: bold;">
                             ${i === 0 ? '👑 ' : ''}${p.name}
                             <span class="bmi-tag ${isLosing ? 'tag-lose' : 'tag-gain'}">${isLosing ? '減重' : '增重'}</span>
@@ -186,6 +185,7 @@
                         <div style="font-size: 11px; opacity: 0.6; margin-top: 5px;">更新: ${p.lastUpdate || '-'}</div>
                     </div>
                     <div class="p-track">
+                        <div class="target-bmi-label">目標 BMI: ${p.tbmi || 24} 🏁</div>
                         <div class="p-fill" style="width: ${barW}%; background: ${color}; box-shadow: 0 0 15px ${color}66;"></div>
                         <div class="runner-box" style="left: ${barW}%;">
                             <div style="font-size: 10px; font-weight: bold; margin-bottom: 2px;">${barW}%</div>
@@ -199,16 +199,29 @@
     function renderAdminList() {
         document.getElementById('adminPlayerList').innerHTML = players.map((p, i) => `
             <div style="background:rgba(0,0,0,0.2); border-radius:8px; padding:8px; margin-bottom:8px; font-size:12px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
                     <span style="font-weight:bold; color:var(--gold);">${p.name}</span>
-                    <button onclick="deletePlayer(${i})" style="color:#ff4d4d; background:none; border:none; cursor:pointer; font-weight:bold;">[移除]</button>
+                    <button onclick="deletePlayer(${i})" style="color:#ff4d4d; background:none; border:none; cursor:pointer;">[移除]</button>
                 </div>
-                <div style="opacity:0.6; font-size:10px;">
-                    進度: ${p.progress}% | 體重: ${p.cw}kg<br>
-                    最後更新: ${p.lastUpdate || '未更新'}
-                </div>
+                <div style="opacity:0.6; font-size:10px; margin-top:4px;">進度: ${p.progress}% | 最後更新: ${p.lastUpdate || 'N/A'}</div>
             </div>
         `).join('');
+    }
+
+    // --- 選單互斥邏輯修正 ---
+    function toggleMenu(id) {
+        const target = document.getElementById(id);
+        const isOpen = target.classList.contains('active');
+        
+        // 先關閉所有選單
+        document.querySelectorAll('.menu-content').forEach(el => {
+            el.classList.remove('active');
+        });
+        
+        // 如果原本是關閉的，就打開它
+        if (!isOpen) {
+            target.classList.add('active');
+        }
     }
 
     function doAdminLogin() {
@@ -231,12 +244,12 @@
         location.reload();
     }
 
-    function deletePlayer(i) { if(confirm(`確定要將選手 ${players[i].name} 移除嗎？`)) { players.splice(i,1); pushToGitHub(); } }
+    function deletePlayer(i) { if(confirm(`移除 ${players[i].name}？`)) { players.splice(i,1); pushToGitHub(); } }
     
     function savePeriod() { 
         period.start = document.getElementById('set_start').value; 
         period.end = document.getElementById('set_end').value; 
-        if(!period.start || !period.end) return alert("請填寫日期");
+        if(!period.start || !period.end) return alert("日期不完整");
         pushToGitHub(); alert("賽期已更新"); 
     }
 
@@ -245,13 +258,6 @@
         const bag = document.getElementById('moneyBag');
         bag.style.transform = 'scale(1.3)';
         setTimeout(() => bag.style.transform = 'scale(1)', 100);
-    }
-
-    function toggleMenu(id) {
-        const target = document.getElementById(id);
-        const isOpen = target.classList.contains('active');
-        document.querySelectorAll('.menu-content').forEach(el => el.classList.remove('active'));
-        if (!isOpen) target.classList.add('active');
     }
 
     function toggleMusic() {
@@ -269,11 +275,11 @@
             document.getElementById('ddayDisplay').innerText = "比賽已結束！";
             return;
         }
-        const days = Math.floor(distance / 86400000);
-        const hours = Math.floor((distance % 86400000) / 3600000);
-        const minutes = Math.floor((distance % 3600000) / 60000);
-        const seconds = Math.floor((distance % 60000) / 1000);
-        document.getElementById('ddayDisplay').innerText = `${String(days).padStart(2,'0')}D ${String(hours).padStart(2,'0')}:${String(minutes).padStart(2,'0')}:${String(seconds).padStart(2,'0')}`;
+        const d = Math.floor(distance / 86400000);
+        const h = Math.floor((distance % 86400000) / 3600000);
+        const m = Math.floor((distance % 3600000) / 60000);
+        const s = Math.floor((distance % 60000) / 1000);
+        document.getElementById('ddayDisplay').innerText = `${String(d).padStart(2,'0')}D ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
     }
 
     function doRegister() {
@@ -282,7 +288,7 @@
         const sw = parseFloat(document.getElementById('r_w').value);
         const tbmi = parseFloat(document.getElementById('r_target_bmi').value);
         const acc = document.getElementById('r_acc').value;
-        if(!name || !h || !sw || !acc) return alert("請填寫完整報名資訊");
+        if(!name || !h || !sw || !acc) return alert("請填寫完整資訊");
         players.push({ name, h, sw, cw: sw, tbmi, acc, progress: 0, lastUpdate: new Date().toLocaleString() });
         pushToGitHub(); toggleMenu('regForm');
     }
