@@ -185,35 +185,38 @@
 
     async function syncFromGitHub() {
         try {
-            const currentSorted = [...players].sort((a, b) => b.progress - a.progress);
-            prevRankMap = {};
-            currentSorted.forEach((p, index) => { prevRankMap[p.name] = index + 1; });
-
+            // 修正：先抓取資料再計算舊排名
             const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}?t=${Date.now()}`, {
                 headers: { "Authorization": `token ${CONFIG.token}` }
             });
             const data = await res.json();
             fileSha = data.sha;
             const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+            
+            // 在更新本地數據前，先紀錄目前的排名狀況做為「舊排名」
+            const currentSorted = [...players].sort((a, b) => b.progress - a.progress);
+            prevRankMap = {};
+            currentSorted.forEach((p, index) => { prevRankMap[p.name] = index + 1; });
+
+            // 更新數據
             players = content.players || [];
             period = content.period || { start: "", end: "2026-04-13" };
             
-            // 更新 UI 與同步時間
             renderList();
             updateCountdown();
             document.getElementById('syncTime').innerText = `最後同步：${new Date().toLocaleString()}`;
             document.getElementById('periodDisplay').innerText = `期間：${period.start || '未設定'} ~ ${period.end}`;
             if(localStorage.getItem('admin_auth') === 'true') renderAdminList();
-        } catch (e) { console.error("同步失敗"); }
+        } catch (e) { console.error("同步失敗", e); }
     }
 
     async function pushToGitHub() {
         const content = btoa(unescape(encodeURIComponent(JSON.stringify({ players, period }))));
         const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
             method: "PUT", headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
-            body: JSON.stringify({ message: "Update", content, sha: fileSha })
+            body: JSON.stringify({ message: "Update Data", content, sha: fileSha })
         });
-        if (!res.ok) throw new Error("GitHub 同步衝突，請重試");
+        if (!res.ok) throw new Error("GitHub 同步衝突，請重新整理頁面再試一次");
         await syncFromGitHub();
     }
 
@@ -223,7 +226,7 @@
         const sorted = [...players].sort((a, b) => b.progress - a.progress);
         
         container.innerHTML = sorted.map((p, i) => {
-            const barW = Math.min(Math.max(p.progress, 0), 100);
+            const barW = Math.min(Math.max(parseFloat(p.progress) || 0, 0), 100);
             const isLosing = (p.tbmi || 24) < (p.sw / ((p.h/100)*(p.h/100))); 
             const speed = 0.6 - (barW / 100 * 0.45);
             const color = barW >= 80 ? '#27ae60' : (barW >= 40 ? '#f39c12' : '#e74c3c');
@@ -245,7 +248,7 @@
                             ${currentRank === 1 ? '👑 ' : ''}${p.name}
                             <span class="bmi-tag ${isLosing ? 'tag-lose' : 'tag-gain'}">${isLosing ? '減重' : '增重'}</span>
                         </div>
-                        <div style="font-size: 11px; opacity: 0.6; margin-top: 5px;">更新: ${p.lastUpdate || '-'}</div>
+                        <div style="font-size: 11px; opacity: 0.6; margin-top: 5px;">最後更新: ${p.lastUpdate || '-'}</div>
                     </div>
                     <div class="p-track">
                         <div class="target-bmi-label">目標 BMI: ${p.tbmi || 24} 🏁</div>
@@ -296,7 +299,7 @@
     }
 
     async function deletePlayer(i) { 
-        if(confirm(`移除 ${players[i].name}？`)) { 
+        if(confirm(`確定要移除參賽者 ${players[i].name} 嗎？此操作不可復原。`)) { 
             players.splice(i,1); 
             await pushToGitHub(); 
         } 
@@ -305,7 +308,7 @@
     async function savePeriod() { 
         period.start = document.getElementById('set_start').value; 
         period.end = document.getElementById('set_end').value; 
-        await pushToGitHub(); alert("賽期已更新"); 
+        await pushToGitHub(); alert("賽期已成功更新"); 
     }
 
     function makeItRain() {
@@ -318,7 +321,7 @@
     function toggleMusic() {
         const m = document.getElementById('bgMusic');
         const btn = document.getElementById('musicToggle');
-        if (m.paused) { m.play(); btn.innerText = "🔊"; } else { m.pause(); btn.innerText = "🔇"; }
+        if (m.paused) { m.play().catch(e=>console.log("需互動後播放")); btn.innerText = "🔊"; } else { m.pause(); btn.innerText = "🔇"; }
     }
 
     function updateCountdown() {
@@ -326,7 +329,7 @@
         const target = new Date(period.end + "T23:59:59").getTime();
         const now = new Date().getTime();
         const distance = target - now;
-        if (distance < 0) { document.getElementById('ddayDisplay').innerText = "已結束"; return; }
+        if (distance < 0) { document.getElementById('ddayDisplay').innerText = "挑戰已結束"; return; }
         const d = Math.floor(distance / 86400000);
         const h = Math.floor((distance % 86400000) / 3600000);
         const m = Math.floor((distance % 3600000) / 60000);
@@ -336,15 +339,18 @@
 
     async function doRegister() {
         const btn = document.getElementById('regBtn');
-        const name = document.getElementById('r_name').value;
+        const name = document.getElementById('r_name').value.trim();
         const h = parseFloat(document.getElementById('r_h').value);
         const sw = parseFloat(document.getElementById('r_w').value);
         const tbmi = parseFloat(document.getElementById('r_target_bmi').value);
         const acc = document.getElementById('r_acc').value;
-        if(!name || !h || !sw || !acc) return alert("請填寫完整");
+        if(!name || isNaN(h) || isNaN(sw) || !acc) return alert("請填寫完整報名資訊");
         try {
             btn.disabled = true; btn.innerText = "處理中...";
             await syncFromGitHub();
+            // 防止重複報名
+            if(players.some(p => p.name === name)) throw new Error("該姓名已存在，請使用其他名稱");
+            
             players.push({ name, h, sw, cw: sw, tbmi, acc, progress: 0, lastUpdate: new Date().toLocaleString() });
             await pushToGitHub();
             alert("報名成功！");
@@ -355,23 +361,30 @@
 
     async function doUpdate() {
         const btn = document.getElementById('updBtn');
-        const name = document.getElementById('u_name').value;
+        const name = document.getElementById('u_name').value.trim();
         const acc = document.getElementById('u_acc').value;
         const w = parseFloat(document.getElementById('u_w').value);
-        if(!name || !acc || isNaN(w)) return alert("請輸入完整資訊");
+        if(!name || !acc || isNaN(w)) return alert("請輸入完整的更新資訊");
         try {
-            btn.disabled = true; btn.innerText = "同步中...";
-            await syncFromGitHub();
+            btn.disabled = true; btn.innerText = "數據計算中...";
+            await syncFromGitHub(); // 更新前先抓取最新 SHA 與數據
+            
             const p = players.find(x => x.name === name && x.acc === acc);
             if(!p) throw new Error("驗證失敗：姓名或密碼不正確");
+            
             p.cw = w; 
             p.lastUpdate = new Date().toLocaleString();
+            
+            // 重新計算進度
             const targetW = p.tbmi * ((p.h/100)*(p.h/100));
             const initialGap = Math.abs(p.sw - targetW);
             const currentGap = Math.abs(w - targetW);
+            
+            // 計算百分比並寫入
             p.progress = initialGap === 0 ? 100 : Math.max(0, ((1 - (currentGap / initialGap)) * 100)).toFixed(1);
+            
             await pushToGitHub();
-            alert("🎉 體重數據同步成功！");
+            alert(`🎉 ${name} 的體重數據已同步成功！`);
             toggleMenu('updForm');
         } catch (e) { alert(e.message); }
         finally { btn.disabled = false; btn.innerText = "同步數據"; }
