@@ -3,35 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2026 減肥戰士 - 旗艦修正版</title>
+    <title>2026 減肥戰士 - 動畫加速旗艦版</title>
     <style>
         :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #333; --success: #27ae60; --danger: #e74c3c; --warning: #f39c12; --track: #edf2f7; }
         
-        body { 
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
-            margin: 0; 
-            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=2000'); 
-            background-size: cover; 
-            background-attachment: fixed; 
-            min-height: 100vh; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-        }
+        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; margin: 0; background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?q=80&w=2000'); background-size: cover; background-attachment: fixed; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
         
         .main-layout { display: flex; gap: 30px; width: 95%; max-width: 1200px; height: 90vh; align-items: flex-start; }
         
-        /* --- 左側工具列：解決被切到問題 --- */
-        .control-panel { 
-            flex: 0 0 380px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 15px; 
-            max-height: 85vh; 
-            overflow-y: auto; 
-            padding-right: 10px;
-            padding-bottom: 30px;
-        }
+        /* 工具列捲動修正 */
+        .control-panel { flex: 0 0 380px; display: flex; flex-direction: column; gap: 15px; max-height: 85vh; overflow-y: auto; padding-right: 10px; padding-bottom: 30px; }
         .control-panel::-webkit-scrollbar { width: 5px; }
         .control-panel::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 10px; }
 
@@ -40,7 +21,6 @@
         .prize-amount { font-size: 36px; font-weight: 900; }
         .timer-box { background: #1a253a; color: #f1c40f; padding: 12px; font-size: 18px; text-align: center; font-weight: bold; }
         
-        /* --- 右側排行榜 --- */
         .rank-display { flex: 1; height: 100%; display: flex; flex-direction: column; gap: 15px; overflow-y: auto; padding-right: 10px; }
         .rank-card { background: rgba(255, 255, 255, 0.95); padding: 20px; border-radius: 20px; display: flex; align-items: center; gap: 15px; border: 1px solid rgba(255,255,255,0.5); position: relative; }
         .rank-number { flex: 0 0 50px; text-align: center; font-size: 24px; font-weight: 900; color: var(--primary); }
@@ -50,20 +30,24 @@
         .p-info { flex: 0 0 130px; }
         .p-name { font-weight: 900; font-size: 18px; color: var(--primary); }
 
-        /* --- 進度條與數字跟隨修正 --- */
-        .p-track { flex: 1; position: relative; height: 14px; background: var(--track); border-radius: 7px; margin-top: 35px; border: 1px solid #eee; }
+        /* 進度條佈局 */
+        .p-track { flex: 1; position: relative; height: 14px; background: var(--track); border-radius: 7px; margin-top: 40px; border: 1px solid #eee; }
         .p-fill { height: 100%; border-radius: 7px; transition: width 1s ease-in-out; position: absolute; left: 0; top: 0; z-index: 1; }
         
-        .runner-box { position: absolute; top: -48px; transition: left 1s ease-in-out; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; z-index: 5; }
-        .runner-emoji { font-size: 28px; transform: scaleX(-1); line-height: 1; }
-        .runner-percent { font-size: 13px; font-weight: 900; background: rgba(255,255,255,0.8); padding: 2px 6px; border-radius: 10px; margin-bottom: -5px; white-space: nowrap; text-shadow: 1px 1px 0px #fff; }
+        /* 🏃 小人容器：動畫時間將由 JS 動態注入 */
+        .runner-box { position: absolute; top: -52px; transition: left 1s ease-in-out; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; z-index: 5; }
+        .runner-emoji { font-size: 30px; transform: scaleX(-1); line-height: 1; /* 動畫名稱已定義，時間將由 JS 控制 */ animation-name: bounce; animation-iteration-count: infinite; animation-direction: alternate; animation-timing-function: linear; }
+        .runner-percent { font-size: 12px; font-weight: 900; background: rgba(255,255,255,0.9); padding: 1px 6px; border-radius: 10px; margin-bottom: -2px; white-space: nowrap; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
 
-        /* 表單元素樣式 */
+        /* 定義跳動動畫 */
+        @keyframes bounce { from { transform: scaleX(-1) translateY(0); } to { transform: scaleX(-1) translateY(-6px); /* 稍微調高一點跳躍幅度 */ } }
+
         .menu-trigger { width: 100%; padding: 15px 25px; background: white; border: none; text-align: left; font-size: 15px; font-weight: bold; cursor: pointer; display: flex; justify-content: space-between; border-bottom: 1px solid #eee; }
         .menu-content { max-height: 0; overflow: hidden; transition: max-height 0.4s; background: #fff; }
         .menu-content.active { max-height: 1000px; padding: 20px; }
         .btn-submit { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
         input, select { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 14px; }
+        label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -76,7 +60,7 @@
                 <div style="font-size: 12px; opacity: 0.9;">2026 減肥戰士獎金池</div>
                 <div class="prize-amount" id="totalPrize">NT$ 0</div>
             </div>
-            <div id="periodDisplay" style="background: #1a253a; color: #fff; font-size: 11px; text-align: center; padding: 5px; opacity: 0.7;">連線中...</div>
+            <div id="periodDisplay" style="background: #1a253a; color: #fff; font-size: 11px; text-align: center; padding: 5px; opacity: 0.7;">同步中...</div>
             <div class="timer-box" id="ddayDisplay">00D 00:00:00</div>
             <div id="syncStatus" style="font-size: 10px; color: #999; text-align: center; padding: 5px;">☁️</div>
         </div>
@@ -88,10 +72,11 @@
                     <input type="text" id="r_name" placeholder="姓名">
                     <input type="number" id="r_h" placeholder="身高(cm)">
                     <input type="number" id="r_w" placeholder="初始體重(kg)">
+                    <label>請選擇目標 BMI：</label>
                     <select id="r_target_bmi">
-                        <option value="24">目標 BMI 24</option>
-                        <option value="22">目標 BMI 22</option>
-                        <option value="20">目標 BMI 20</option>
+                        <option value="24">目標 BMI 24 (標準)</option>
+                        <option value="22">目標 BMI 22 (理想)</option>
+                        <option value="20">目標 BMI 20 (精實)</option>
                     </select>
                     <input type="password" id="r_acc" placeholder="建立更新體重用密碼">
                     <button class="btn-submit" onclick="doRegister()">確認報名</button>
@@ -112,7 +97,7 @@
                     <input type="password" id="adm_pw" placeholder="管理密碼">
                     <button class="btn-submit" onclick="doAdminLogin()">登入管理後台</button>
                     <div id="adminDataArea" style="display:none; margin-top:15px; padding-top:10px; border-top:1px dashed #ccc;">
-                        <label style="font-size:12px; color:#666;">賽期設定：</label>
+                        <label>賽期設定：</label>
                         <input type="date" id="set_start">
                         <input type="date" id="set_end">
                         <button class="btn-submit" onclick="savePeriod()" style="background:#444;">儲存賽期</button>
@@ -141,7 +126,6 @@
             const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}?t=${new Date().getTime()}`, {
                 headers: { "Authorization": `token ${CONFIG.token}` }
             });
-            if (!res.ok) throw new Error("讀取失敗");
             const data = await res.json();
             fileSha = data.sha;
             const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
@@ -156,7 +140,7 @@
             updateCountdown();
             if(document.getElementById('adminDataArea').style.display === 'block') renderAdminList();
             document.getElementById('syncStatus').innerText = `✅ 最後同步: ${new Date().toLocaleTimeString()}`;
-        } catch (e) { document.getElementById('syncStatus').innerText = "❌ 讀取資料失敗"; }
+        } catch (e) { document.getElementById('syncStatus').innerText = "❌ 同步失敗"; }
     }
 
     async function pushToGitHub() {
@@ -169,11 +153,20 @@
         syncFromGitHub();
     }
 
+    // 🏆 計算動畫速度的函式
+    // 百分比越高，時間越短 (越快)
+    function calculateRunDuration(progress) {
+        const p = parseFloat(progress);
+        // 公式：1.0s - (百分比 * 0.008)，並限制在 0.2s 到 1.0s 之間
+        const duration = 1.0 - (p * 0.008); 
+        return Math.max(0.2, Math.min(1.0, duration)).toFixed(2);
+    }
+
     function renderList(oldRankMap) {
         document.getElementById('totalPrize').innerText = `NT$ ${players.length * 500}`;
         const container = document.getElementById('rankContainer');
         const sorted = [...players].sort((a,b) => b.progress - a.progress);
-        container.innerHTML = "";
+        container.innerHTML = sorted.length ? '' : '<div class="glass" style="padding:40px; text-align:center;">等待挑戰者...</div>';
         
         sorted.forEach((p, i) => {
             const currentRank = i + 1;
@@ -186,7 +179,10 @@
             const barW = Math.min(Math.max(p.progress, 0), 100);
             const color = p.progress >= 80 ? '#27ae60' : (p.progress >= 50 ? '#f39c12' : '#e74c3c');
 
-            // 修正：將百分比文字移到小人上方
+            // 🏆 計算此參賽者的動畫時間
+            const runDuration = calculateRunDuration(p.progress);
+
+            // 修正：將百分比文字移到小人上方，並動態注入動畫時間
             container.innerHTML += `
                 <div class="rank-card">
                     <div class="rank-number">${currentRank}${changeHtml}</div>
@@ -195,11 +191,12 @@
                         <div style="font-size:10px;color:#999;margin-top:5px;">更新: ${p.lastUpdate || '-'}</div>
                     </div>
                     <div class="p-track">
-                        <div style="position:absolute; right:0; top:-25px; font-size:10px; color:var(--accent); font-weight:bold;">目標 BMI: ${p.tbmi} 🏁</div>
+                        <div style="position:absolute; right:0; top:-28px; font-size:10px; color:var(--accent); font-weight:bold;">目標 BMI: ${p.tbmi} 🏁</div>
                         <div class="p-fill" style="width: ${barW}%; background: ${color};"></div>
+                        
                         <div class="runner-box" style="left: ${barW}%;">
                             <span class="runner-percent" style="color:${color}">${p.progress}%</span>
-                            <span class="runner-emoji">🏃</span>
+                            <span class="runner-emoji" style="animation-duration: ${runDuration}s;">🏃</span>
                         </div>
                     </div>
                 </div>`;
@@ -233,7 +230,7 @@
                 <span><b>${p.name}</b> (${p.cw}kg)</span>
                 <button onclick="deletePlayer(${i})" style="color:red; background:none; border:none; cursor:pointer;">移除</button>
             </div>
-        `).join('') || '目前無資料';
+        `).join('') || '尚無參賽者';
     }
 
     function deletePlayer(i) {
@@ -244,6 +241,7 @@
         period.start = document.getElementById('set_start').value;
         period.end = document.getElementById('set_end').value;
         pushToGitHub();
+        alert("賽期已儲存");
     }
 
     function updateCountdown() {
@@ -290,7 +288,7 @@
     }
 
     window.onload = () => { syncFromGitHub(); setInterval(updateCountdown, 1000); };
-    setInterval(syncFromGitHub, 60000); // 每一分鐘自動從雲端同步
+    setInterval(syncFromGitHub, 60000);
 </script>
 </body>
 </html>
