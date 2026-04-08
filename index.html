@@ -3,171 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>三個月減肥大賽 - 獎金排行榜</title>
+    <title>2026 減肥戰士挑戰賽</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #2c3e50; }
-        .stats { display: flex; justify-content: space-around; background: #ecf0f1; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-        .stat-box { text-align: center; }
-        .stat-value { font-size: 1.5em; font-weight: bold; color: #e67e22; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
-        th { background-color: #3498db; color: white; }
-        .progress-bar { background: #eee; border-radius: 10px; height: 10px; width: 100%; margin-top: 5px; }
-        .progress-fill { background: #2ecc71; height: 100%; border-radius: 10px; transition: width 0.5s; }
-        .admin-section { margin-top: 30px; border-top: 2px dashed #ccc; padding-top: 20px; display: none; }
-        .btn { background: #3498db; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
-        .btn-admin { background: #95a5a6; }
-        .input-group { margin-bottom: 10px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        .rank-1 { background-color: #fff9c4; font-weight: bold; }
+        :root { --primary: #2c3e50; --accent: #27ae60; --bg: #f8f9fa; }
+        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: var(--bg); color: var(--primary); margin: 0; padding: 20px; line-height: 1.6; }
+        .container { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        h1 { text-align: center; font-size: 24px; margin-bottom: 10px; }
+        .prize-box { background: linear-gradient(135deg, #f39c12, #e67e22); color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 25px; }
+        .prize-amount { font-size: 32px; font-weight: bold; }
+        
+        /* 列表樣式 */
+        .rank-card { background: #fff; border: 1px solid #edf2f7; padding: 15px; border-radius: 12px; margin-bottom: 15px; position: relative; }
+        .rank-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .player-name { font-weight: bold; font-size: 18px; }
+        .progress-text { font-weight: bold; color: var(--accent); }
+        
+        /* 進度條樣式 */
+        .progress-bg { background: #e2e8f0; height: 12px; border-radius: 6px; overflow: hidden; }
+        .progress-bar { background: var(--accent); height: 100%; border-radius: 6px; transition: width 1s ease-in-out; }
+        
+        .admin-panel { margin-top: 40px; padding-top: 20px; border-top: 2px dashed #cbd5e0; display: none; }
+        .input-group { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        input { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        button { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-add { background: var(--primary); color: white; width: 100%; }
+        .btn-toggle { background: #edf2f7; color: #4a5568; margin-top: 20px; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🏆 三個月減肥大賽</h1>
-    <p style="text-align:center; color: #7f8c8d;">目標：BMI 24 達標百分比最高者奪得全額獎金</p>
+    <h1>🏆 減肥遊戲挑戰賽</h1>
+    <p style="text-align: center; color: #718096; margin-top: -10px;">三個月計畫：邁向 BMI 24 巔峰</p>
 
-    <div class="stats">
-        <div class="stat-box"><div>總參加人數</div><div class="stat-value" id="totalCount">0</div></div>
-        <div class="stat-box"><div>總獎金池</div><div class="stat-value" id="totalPrize">NT$ 0</div></div>
+    <div class="prize-box">
+        <div>目前總獎金池</div>
+        <div class="prize-amount" id="totalPrize">NT$ 0</div>
+        <div id="participantCount">共 0 人參賽</div>
     </div>
 
-    <table id="rankTable">
-        <thead>
-            <tr>
-                <th>排名</th>
-                <th>參賽者</th>
-                <th>進度百分比</th>
-            </tr>
-        </thead>
-        <tbody>
-            </tbody>
-    </table>
+    <div id="rankContainer">
+        </div>
 
-    <div style="margin-top: 20px; text-align: center;">
-        <button class="btn btn-admin" onclick="toggleAdmin()">管理者模式 (錄入數據)</button>
-    </div>
+    <center><button class="btn-toggle" onclick="toggleAdmin()">管理者後台入口</button></center>
 
-    <div id="adminArea" class="admin-section">
-        <h3>新增參賽者資料</h3>
+    <div id="adminPanel" class="admin-panel">
+        <h3>管理者更新區</h3>
         <div class="input-group">
-            <label>姓名</label>
-            <input type="text" id="name" placeholder="請輸入姓名">
+            <input type="text" id="name" placeholder="姓名">
+            <input type="number" id="h" placeholder="身高 (cm)">
+            <input type="number" id="sw" placeholder="初始體重 (kg)">
+            <input type="number" id="cw" placeholder="本週體重 (kg)">
         </div>
-        <div class="input-group">
-            <label>身高 (cm)</label>
-            <input type="number" id="height" placeholder="例如: 172">
-        </div>
-        <div class="input-group">
-            <label>初始體重 (kg)</label>
-            <input type="number" id="startWeight" placeholder="例如: 88">
-        </div>
-        <div class="input-group">
-            <label>目前體重 (kg)</label>
-            <input type="number" id="currentWeight" placeholder="例如: 85">
-        </div>
-        <button class="btn" onclick="addData()">儲存資料</button>
-
-        <h3>原始數據清單 (僅管理者見)</h3>
-        <table id="adminTable">
-            <thead>
-                <tr>
-                    <th>姓名</th>
-                    <th>身高</th>
-                    <th>初始</th>
-                    <th>目前</th>
-                    <th>目標(BMI 24)</th>
-                    <th>操作</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
+        <button class="btn-add" onclick="saveData()">新增 / 更新數據</button>
+        
+        <table style="width: 100%; margin-top: 20px; font-size: 12px; text-align: left;">
+            <thead><tr><th>姓名</th><th>身高</th><th>初始</th><th>目前</th><th>操作</th></tr></thead>
+            <tbody id="adminList"></tbody>
         </table>
     </div>
 </div>
 
 <script>
-    let players = JSON.parse(localStorage.getItem('weightData')) || [];
+    // 資料獲取與存儲
+    let players = JSON.parse(localStorage.getItem('diet_game_data')) || [];
 
-    function addData() {
+    function saveData() {
         const name = document.getElementById('name').value;
-        const h = parseFloat(document.getElementById('height').value);
-        const sw = parseFloat(document.getElementById('startWeight').value);
-        const cw = parseFloat(document.getElementById('currentWeight').value);
+        const h = parseFloat(document.getElementById('h').value);
+        const sw = parseFloat(document.getElementById('sw').value);
+        const cw = parseFloat(document.getElementById('cw').value);
 
-        if(!name || !h || !sw || !cw) return alert("請填寫完整！");
+        if (!name || !h || !sw || !cw) return alert("資料請填寫完整！");
 
-        // 計算 BMI 24 目標體重: (H/100)^2 * 24
-        const targetWeight = Math.round(((h / 100) ** 2 * 24) * 10) / 10;
-        
-        // 進度百分比: (初始 - 目前) / (初始 - 目標)
-        const progress = ((sw - cw) / (sw - targetWeight)) * 100;
+        // BMI 24 計算邏輯
+        const target = Math.round(((h / 100) ** 2 * 24) * 10) / 10;
+        const progress = ((sw - cw) / (sw - target) * 100).toFixed(1);
 
-        players.push({ name, h, sw, cw, targetWeight, progress: progress.toFixed(1) });
-        saveAndRefresh();
-        
-        // 清空輸入框
-        ['name', 'height', 'startWeight', 'currentWeight'].forEach(id => document.getElementById(id).value = '');
-    }
+        const index = players.findIndex(p => p.name === name);
+        if (index > -1) {
+            players[index] = { name, h, sw, cw, target, progress };
+        } else {
+            players.push({ name, h, sw, cw, target, progress });
+        }
 
-    function saveAndRefresh() {
-        localStorage.setItem('weightData', JSON.stringify(players));
+        localStorage.setItem('diet_game_data', JSON.stringify(players));
         render();
+        alert("更新成功！");
     }
 
-    function deleteData(index) {
-        if(confirm("確定刪除此參賽者？")) {
+    function deletePlayer(index) {
+        if (confirm("確定移除這位勇士？")) {
             players.splice(index, 1);
-            saveAndRefresh();
+            localStorage.setItem('diet_game_data', JSON.stringify(players));
+            render();
         }
     }
 
     function render() {
-        // 更新統計數據
-        document.getElementById('totalCount').innerText = players.length;
-        document.getElementById('totalPrize').innerText = `NT$ ${players.length * 500}`;
+        const container = document.getElementById('rankContainer');
+        const adminList = document.getElementById('adminList');
+        const sorted = [...players].sort((a, b) => b.progress - a.progress);
 
-        // 更新排行榜 (排序)
-        const sortedPlayers = [...players].sort((a, b) => b.progress - a.progress);
-        const rankBody = document.querySelector('#rankTable tbody');
-        rankBody.innerHTML = '';
-        sortedPlayers.forEach((p, index) => {
-            const row = `<tr class="${index === 0 ? 'rank-1' : ''}">
-                <td>${index + 1}</td>
-                <td>${p.name}</td>
-                <td>
-                    ${p.progress}%
-                    <div class="progress-bar"><div class="progress-fill" style="width: ${Math.min(Math.max(p.progress, 0), 100)}%"></div></div>
-                </td>
-            </tr>`;
-            rankBody.innerHTML += row;
+        // 更新獎金與人數
+        document.getElementById('totalPrize').innerText = `NT$ ${players.length * 500}`;
+        document.getElementById('participantCount').innerText = `共 ${players.length} 人參賽`;
+
+        // 渲染排行榜 (隱藏身高體重)
+        container.innerHTML = sorted.length ? '' : '<p style="text-align:center; color:#ccc;">尚無參賽者數據</p>';
+        sorted.forEach((p, i) => {
+            const barWidth = Math.min(Math.max(p.progress, 0), 100);
+            container.innerHTML += `
+                <div class="rank-card">
+                    <div class="rank-header">
+                        <span class="player-name">${i === 0 ? '🥇 ' : ''}${p.name}</span>
+                        <span class="progress-text">${p.progress}%</span>
+                    </div>
+                    <div class="progress-bg">
+                        <div class="progress-bar" style="width: ${barWidth}%"></div>
+                    </div>
+                </div>
+            `;
         });
 
-        // 更新管理者表單
-        const adminBody = document.querySelector('#adminTable tbody');
-        adminBody.innerHTML = '';
-        players.forEach((p, index) => {
-            const row = `<tr>
-                <td>${p.name}</td>
-                <td>${p.h}</td>
-                <td>${p.sw}</td>
-                <td>${p.cw}</td>
-                <td>${p.targetWeight}kg</td>
-                <td><button onclick="deleteData(${index})">刪除</button></td>
-            </tr>`;
-            adminBody.innerHTML += row;
+        // 渲染管理者列表
+        adminList.innerHTML = '';
+        players.forEach((p, i) => {
+            adminList.innerHTML += `
+                <tr>
+                    <td>${p.name}</td><td>${p.h}</td><td>${p.sw}</td><td>${p.cw}</td>
+                    <td><button onclick="deletePlayer(${i})">刪除</button></td>
+                </tr>
+            `;
         });
     }
 
     function toggleAdmin() {
-        const area = document.getElementById('adminArea');
-        area.style.display = area.style.display === 'none' ? 'block' : 'none';
+        const p = document.getElementById('adminPanel');
+        p.style.display = p.style.display === 'none' ? 'block' : 'none';
     }
 
-    // 初始化渲染
     render();
 </script>
 
