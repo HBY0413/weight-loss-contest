@@ -11,8 +11,14 @@
         .treasure-header { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; padding: 25px 20px; border-radius: 20px; text-align: center; margin-bottom: 15px; }
         .treasure-icon { font-size: 50px; display: block; }
         .prize-amount { font-size: 42px; font-weight: 900; }
-        .info-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 16px; margin-bottom: 20px; font-size: 13px; }
-        .info-title { font-weight: bold; color: var(--primary); border-bottom: 2px solid #cbd5e0; padding-bottom: 5px; margin-bottom: 10px; display: block; }
+        
+        /* BMI 資訊卡片 */
+        .info-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 18px; border-radius: 16px; margin-bottom: 20px; font-size: 13px; }
+        .info-title { font-weight: bold; color: var(--primary); border-bottom: 2px solid #cbd5e0; padding-bottom: 8px; margin-bottom: 12px; display: block; font-size: 15px; }
+        .bmi-table { width: 100%; border-collapse: collapse; }
+        .bmi-table td { padding: 8px 0; border-bottom: 1px dashed #e2e8f0; }
+        .bmi-val { font-weight: bold; color: var(--accent); text-align: right; }
+        
         .rank-card { background: #fff; border: 1px solid #f1f3f5; padding: 18px; border-radius: 16px; margin-bottom: 12px; }
         .progress-bg { background: #edf2f7; height: 12px; border-radius: 6px; overflow: hidden; margin-top: 10px; }
         .progress-bar { background: linear-gradient(90deg, #2ecc71, #27ae60); height: 100%; transition: width 1s; }
@@ -24,6 +30,7 @@
         .form-panel { background: #fff; padding: 20px; border-radius: 16px; border: 2px solid var(--gold); margin-top: 15px; }
         input { padding: 12px; border: 1px solid #cbd5e0; border-radius: 10px; width: 100%; box-sizing: border-box; margin-bottom: 12px; font-size: 14px; }
         label { font-size: 12px; color: #666; font-weight: bold; margin-bottom: 5px; display: block; }
+        .notice-tag { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; float: right; }
     </style>
 </head>
 <body>
@@ -37,9 +44,18 @@
     </div>
 
     <div class="info-card">
-        <span class="info-title">📅 更新規範公告</span>
-        <div>• **更新時段：** 每週六 00:00 至 週日 23:59 全天候開放。</div>
-        <div>• **隱私政策：** 具體體重數據（kg）僅供系統計算，不對外公開。</div>
+        <span class="info-title">📊 BMI 評估基準 <span class="notice-tag">六日開放更新</span></span>
+        <table class="bmi-table">
+            <tr><td>體重過輕</td><td class="bmi-val">BMI < 18.5</td></tr>
+            <tr><td>健康體重 (理想範圍)</td><td class="bmi-val" style="color:var(--success);">18.5 ≦ BMI < 24</td></tr>
+            <tr><td>體重過重</td><td class="bmi-val">24 ≦ BMI < 27</td></tr>
+            <tr><td>輕度肥胖</td><td class="bmi-val" style="color:var(--danger);">27 ≦ BMI < 30</td></tr>
+        </table>
+        <div style="margin-top:12px; font-size:11px; color:#666; line-height: 1.5;">
+            • <b>計算公式：</b>體重(kg) / 身高(m)² <br>
+            • <b>隱私保護：</b>具體公斤數已加密，僅以進度百分比呈現。 <br>
+            • <b>健康門檻：</b>參賽目標不可低於 BMI 18.5。
+        </div>
     </div>
 
     <div id="rankContainer"></div>
@@ -55,7 +71,7 @@
         <input type="text" id="reg_name" placeholder="真實姓名">
         <input type="number" id="reg_h" placeholder="身高 (cm)">
         <input type="number" id="reg_cw" placeholder="初始體重 (kg)">
-        <label>目標 BMI</label>
+        <label>自訂目標 BMI (健康下限 18.5)</label>
         <input type="number" id="reg_tbmi" value="24" step="0.1">
         <input type="password" id="reg_acc" placeholder="自訂更新帳號">
         <button class="btn btn-main" onclick="register()">確認報名</button>
@@ -88,7 +104,7 @@
     const ADMIN_PW = 'gogofit666';
     let players = [];
     try {
-        const saved = localStorage.getItem('diet_2026_final_v10');
+        const saved = localStorage.getItem('diet_2026_final_v11');
         players = saved ? JSON.parse(saved) : [];
     } catch(e) { players = []; }
 
@@ -116,18 +132,17 @@
 
         players.push({ name, h, sw: cw, cw, acc, tbmi, target, progress: 0.0, lastUpdate });
         saveAndRender();
-        alert("報名成功！資料已保密存檔。");
+        alert("報名成功！資料已隱私加密處理。");
         togglePanel('none');
     }
 
     function handleUpdate() {
-        // --- 強制日期檢查 ---
         const now = new Date();
-        const day = now.getDay(); // 0 是週日, 6 是週六
+        const day = now.getDay(); 
 
         if (day !== 0 && day !== 6) {
             alert("【更新失敗】\n目前的更新時段尚未開放。\n請於週六或週日全天候再行回報數據。");
-            return; // 直接攔截，不往下執行
+            return;
         }
 
         const name = document.getElementById('upd_name').value.trim();
@@ -152,7 +167,7 @@
     }
 
     function saveAndRender() {
-        localStorage.setItem('diet_2026_final_v10', JSON.stringify(players));
+        localStorage.setItem('diet_2026_final_v11', JSON.stringify(players));
         render();
     }
 
@@ -162,7 +177,7 @@
         document.getElementById('totalPrize').innerText = `NT$ ${players.length * 500}`;
         document.getElementById('participantCount').innerText = `共 ${players.length} 人參賽`;
 
-        container.innerHTML = sorted.length ? '' : '<p style="text-align:center; color:#ccc;">等待勇士加入...</p>';
+        container.innerHTML = sorted.length ? '' : '<p style="text-align:center; color:#ccc;">等待挑戰者報名...</p>';
         sorted.forEach((p, i) => {
             const barWidth = Math.min(Math.max(p.progress, 0), 100);
             container.innerHTML += `
@@ -173,7 +188,7 @@
                     </div>
                     <div class="progress-bg"><div class="progress-bar" style="width:${barWidth}%"></div></div>
                     <div style="display:flex; justify-content:space-between; font-size:11px; color:#999; margin-top:8px;">
-                        <span>目標 BMI: ${p.tbmi} (體重已加密)</span>
+                        <span>目標 BMI: ${p.tbmi} (體重已隱藏)</span>
                         <span>最後更新: ${p.lastUpdate}</span>
                     </div>
                 </div>
