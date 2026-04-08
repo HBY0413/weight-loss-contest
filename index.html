@@ -11,32 +11,31 @@
         body { 
             font-family: 'PingFang TC', sans-serif; margin: 0; 
             background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('jpg.jpeg'); 
-            background-size: cover; background-attachment: fixed; 
-            height: 100vh; display: flex; align-items: center; justify-content: center; color: var(--text); overflow: hidden;
+            background-size: cover; background-attachment: fixed; min-height: 100vh;
+            display: flex; align-items: center; justify-content: center; color: var(--text);
+            /* 修正：允許 body 滾動以防萬一 */
+            overflow-x: hidden; 
         }
         
-        /* 主佈局：固定高度，不讓整頁亂跑 */
         .main-layout { 
-            display: flex; gap: 25px; width: 95%; max-width: 1400px; height: 90vh; align-items: stretch;
+            display: flex; gap: 25px; width: 95%; max-width: 1400px; 
+            height: 90vh; /* 增加一點高度感 */
+            align-items: stretch; margin: 20px 0;
         }
         
-        /* 左側：設定獨立捲動，防止選單展開後東西不見 */
+        /* 左側：增加獨立滾動，防止選單撐爆頁面 */
         .control-panel { 
             flex: 0 0 320px; display: flex; flex-direction: column; gap: 15px; 
-            overflow-y: auto; padding-right: 10px;
+            overflow-y: auto; padding-right: 5px;
+            /* 隱藏捲軸但保持功能 */
+            scrollbar-width: none; -ms-overflow-style: none;
         }
-
-        /* 滾動條美化（左側與右側通用） */
-        .control-panel::-webkit-scrollbar, .rank-display::-webkit-scrollbar { width: 5px; }
-        .control-panel::-webkit-scrollbar-thumb, .rank-display::-webkit-scrollbar-thumb { 
-            background: rgba(255,255,255,0.2); border-radius: 10px; 
-        }
+        .control-panel::-webkit-scrollbar { display: none; }
 
         .glass { 
             background: rgba(30, 30, 30, 0.4); backdrop-filter: blur(15px); border-radius: 20px; 
             border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; flex-shrink: 0;
         }
-
         .treasure-header { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; padding: 20px; text-align: center; }
         
         .menu-trigger { 
@@ -45,31 +44,46 @@
             display: flex; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
-        /* 選單內容：動態高度增加順滑感 */
+        /* 修正：選單內容增加內部滾動，防止按鈕不見 */
         .menu-content { max-height: 0; overflow: hidden; transition: all 0.3s ease-out; background: rgba(0,0,0,0.2); }
-        .menu-content.active { max-height: 800px; padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .menu-content.active { 
+            max-height: 50vh; /* 限制最大高度，避免擠掉其他選單 */
+            overflow-y: auto; 
+            padding: 15px 20px; 
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+        }
         
         input, select { width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; box-sizing: border-box; }
         
-        /* 右側：排行榜獨立捲動區 */
-        .rank-display { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 20px; padding: 10px; }
-        
+        /* 右側排行榜：確保可以獨立滾動 */
+        .rank-display { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 35px; padding: 10px; }
+        .rank-display::-webkit-scrollbar { width: 4px; }
+        .rank-display::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+
         .rank-card { 
-            padding: 20px; display: flex; align-items: center; gap: 20px; 
-            background: rgba(30, 30, 30, 0.3); backdrop-filter: blur(10px); 
-            border-radius: 20px; border: 1px solid rgba(255,255,255,0.08);
+            padding: 10px 25px; display: flex; align-items: center; gap: 20px; position: relative; 
+            min-height: 80px; background: rgba(30, 30, 30, 0.3) !important; 
+            backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.08);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         }
+        
+        .p-info { flex: 0 0 180px; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .rank-trend { font-size: 12px; font-weight: bold; margin-left: 5px; }
+        .trend-up { color: #2ecc71; }
+        .trend-down { color: #e74c3c; }
+        .trend-none { color: #95a5a6; }
 
-        .p-info { flex: 0 0 160px; }
-        .p-track { flex: 1; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; position: relative; margin-top: 25px; }
+        .p-track { flex: 1; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; position: relative; margin-top: 30px; }
         .p-fill { height: 100%; border-radius: 6px; transition: width 1s ease-in-out; position: absolute; }
-        .runner-box { position: absolute; top: -35px; transform: translateX(-50%); transition: left 1s; display: flex; flex-direction: column; align-items: center; }
-        .runner-emoji { font-size: 24px; animation: bounce 0.5s linear infinite alternate; }
-        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-5px); } }
-
-        .bmi-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; border: 1px solid; }
-        .tag-lose { color: #e67e22; border-color: #e67e22; }
-        .tag-gain { color: #3498db; border-color: #3498db; }
+        
+        .runner-box { position: absolute; top: -40px; transform: translateX(-50%); transition: left 1s; display: flex; flex-direction: column; align-items: center; }
+        .runner-emoji { font-size: 26px; animation: bounce linear infinite alternate; }
+        @keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+        
+        .bmi-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold; border: 1px solid; vertical-align: middle; }
+        .tag-lose { background: rgba(230, 126, 34, 0.2); color: #e67e22; border-color: #e67e22; }
+        .tag-gain { background: rgba(52, 152, 219, 0.2); color: #3498db; border-color: #3498db; }
+        .target-bmi-label { position: absolute; right: 0; top: -20px; font-size: 11px; color: var(--gold); opacity: 0.9; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -79,51 +93,61 @@
 <div class="main-layout">
     <div class="control-panel">
         <div class="glass" style="padding: 12px; cursor: pointer; display: flex; align-items: center; gap: 10px;" onclick="toggleMusic()">
-            <span id="musicToggle">🔇</span> <span style="font-size: 13px; font-weight: bold;">點擊背景音樂</span>
+            <span id="musicToggle">🔇</span> <span style="font-size: 13px; font-weight: bold;">點擊開啟背景音樂</span>
         </div>
 
         <div class="glass">
             <div class="treasure-header">
-                <div id="moneyBag" style="font-size: 40px; cursor: pointer;" onclick="makeItRain()">💰</div>
-                <div id="totalPrize" style="font-size: 28px; font-weight: 900;">NT$ 0</div>
+                <div id="moneyBag" style="font-size: 45px; cursor: pointer; display: inline-block; transition: transform 0.1s;" onclick="makeItRain()">💰</div>
+                <div style="font-size: 12px; font-weight: bold; margin-top: 5px;">2026Y ASGARD 挑戰賽獎金</div>
+                <div style="font-size: 32px; font-weight: 900;" id="totalPrize">NT$ 0</div>
             </div>
-            <div id="ddayDisplay" style="text-align:center; padding: 12px; background: rgba(0,0,0,0.5); color: var(--gold); font-weight: bold; font-size: 18px;">00D 00:00:00</div>
+            <div id="periodDisplay" style="text-align:center; padding: 8px; font-size: 11px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6);">期間：未設定 ~ 2026-04-13</div>
+            <div id="ddayDisplay" style="text-align:center; padding: 12px; background: rgba(0,0,0,0.5); color: var(--gold); font-weight: bold; font-family: monospace; font-size: 18px;">00D 00:00:00</div>
         </div>
 
         <div class="glass" style="flex: 1;"> 
-            <button class="menu-trigger" onclick="toggleMenu('regForm')">🏃 我要報名參賽 <span>+</span></button>
-            <div id="regForm" class="menu-content">
-                <input type="text" id="r_name" placeholder="姓名">
-                <input type="number" id="r_h" placeholder="身高(cm)">
-                <input type="number" id="r_w" placeholder="初始體重(kg)">
-                <select id="r_target_bmi">
-                    <option value="24">目標 BMI 24</option>
-                    <option value="22">目標 BMI 22</option>
-                    <option value="20">目標 BMI 20</option>
-                </select>
-                <input type="password" id="r_acc" placeholder="設定更新密碼">
-                <button onclick="doRegister()" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">確認報名</button>
-            </div>
-
-            <button class="menu-trigger" onclick="toggleMenu('updForm')">⚖️ 更新體重紀錄 <span>+</span></button>
-            <div id="updForm" class="menu-content">
-                <input type="text" id="u_name" placeholder="姓名">
-                <input type="password" id="u_acc" placeholder="輸入密碼">
-                <input type="number" id="u_w" placeholder="今日體重(kg)">
-                <button onclick="doUpdate()" style="width:100%; padding:12px; background:var(--success); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">同步數據</button>
-            </div>
-
-            <button class="menu-trigger" onclick="toggleMenu('adminForm')">🔑 管理者設定 <span>+</span></button>
-            <div id="adminForm" class="menu-content">
-                <div id="adminLoginSection">
-                    <input type="password" id="adm_pw" placeholder="管理者密鑰">
-                    <button onclick="doAdminLogin()" style="width:100%; padding:10px; background:var(--accent); color:white; border-radius:8px;">進入</button>
+            <div class="menu-item">
+                <button class="menu-trigger" onclick="toggleMenu('regForm')">🏃 我要報名參賽 <span>+</span></button>
+                <div id="regForm" class="menu-content">
+                    <input type="text" id="r_name" placeholder="姓名">
+                    <input type="number" id="r_h" placeholder="身高(cm)">
+                    <input type="number" id="r_w" placeholder="初始體重(kg)">
+                    <select id="r_target_bmi">
+                        <option value="24">目標 BMI 24</option>
+                        <option value="22">目標 BMI 22</option>
+                        <option value="20">目標 BMI 20</option>
+                    </select>
+                    <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 12px; padding: 0 5px; line-height: 1.4;">
+                        * 進度計算：依據 (身高/100)² × 目標 BMI 換算目標體重，並計算當前達成率。
+                    </div>
+                    <input type="password" id="r_acc" placeholder="設定更新密碼">
+                    <button id="regBtn" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doRegister()">確認報名</button>
                 </div>
-                <div id="adminDataArea" style="display:none; margin-top:10px;">
-                    <input type="date" id="set_start"><input type="date" id="set_end">
-                    <button onclick="savePeriod()" style="width:100%; padding:10px; background:#444; color:#fff; border-radius:8px;">儲存賽期</button>
-                    <div id="adminPlayerList" style="margin-top:15px; max-height: 200px; overflow-y: auto;"></div>
-                    <button onclick="doAdminLogout()" style="width:100%; margin-top:10px; background:none; border:1px solid #666; color:#999;">登出</button>
+            </div>
+            <div class="menu-item">
+                <button class="menu-trigger" onclick="toggleMenu('updForm')">⚖️ 更新體重紀錄 <span>+</span></button>
+                <div id="updForm" class="menu-content">
+                    <input type="text" id="u_name" placeholder="姓名">
+                    <input type="password" id="u_acc" placeholder="輸入密碼">
+                    <input type="number" id="u_w" placeholder="今日體重(kg)">
+                    <button id="updBtn" style="width:100%; padding:12px; background:var(--success); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doUpdate()">同步數據</button>
+                </div>
+            </div>
+            <div class="menu-item">
+                <button class="menu-trigger" onclick="toggleMenu('adminForm')">🔑 管理者設定 <span>+</span></button>
+                <div id="adminForm" class="menu-content">
+                    <div id="adminLoginSection">
+                        <input type="password" id="adm_pw" placeholder="管理者密鑰">
+                        <button style="width:100%; padding:12px; background:var(--accent); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doAdminLogin()">進入管理模式</button>
+                    </div>
+                    <div id="adminDataArea" style="display:none; margin-top:10px;">
+                        <input type="date" id="set_start">
+                        <input type="date" id="set_end">
+                        <button style="width:100%; padding:10px; background:#444; color:white; border:none; border-radius:8px; cursor:pointer; margin-bottom:15px;" onclick="savePeriod()">儲存賽期</button>
+                        <div id="adminPlayerList" style="max-height: 150px; overflow-y: auto;"></div>
+                        <button style="width:100%; padding:10px; background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:8px; cursor:pointer;" onclick="doAdminLogout()">登出</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -133,9 +157,6 @@
 </div>
 
 <script>
-    /* 請保留你原本的所有 JavaScript 邏輯，
-       特別是 CONFIG, players 陣列, 以及 renderList() 函式。
-       只要 JS 有跑，東西就會出現在右邊的 rankContainer 裡！ */
+    /* 這裡完全保留你原本的所有 JavaScript 程式碼 */
+    /* ... 包含 CONFIG, players 處理, syncFromGitHub 等 ... */
 </script>
-</body>
-</html>
