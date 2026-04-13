@@ -33,8 +33,10 @@
         }
         .intro-btn:hover { background: rgba(255,255,255,0.2); border-color: var(--gold); }
 
+        /* RWD 佈局核心 */
         .main-layout { display: flex; gap: 25px; width: 95%; max-width: 1400px; min-height: 85vh; align-items: flex-start; }
         .control-panel { flex: 0 0 320px; display: flex; flex-direction: column; gap: 15px; position: sticky; top: 20px; }
+        
         .glass { background: rgba(30, 30, 30, 0.4); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; flex-shrink: 0; }
         .sync-style-text { font-size: 10px; color: rgba(255, 255, 255, 0.5); white-space: nowrap; }
         #musicControl { cursor: pointer; transition: opacity 0.2s; display: flex; align-items: center; gap: 8px; }
@@ -47,6 +49,7 @@
         .formula-box b { color: var(--gold); }
         input, select { width: 100%; padding: 10px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: #fff; box-sizing: border-box; }
         input:disabled { opacity: 0.3; cursor: not-allowed; }
+        
         .rank-display { flex: 1; display: flex; flex-direction: column; gap: 20px; padding: 10px; }
         .rank-card { padding: 10px 25px; display: flex; align-items: center; gap: 20px; position: relative; min-height: 80px; background: rgba(30, 30, 30, 0.3) !important; backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
         .p-info { flex: 0 0 180px; }
@@ -54,16 +57,33 @@
         .trend-up { color: #2ecc71; }
         .trend-down { color: #e74c3c; }
         .trend-none { color: #95a5a6; }
+        
         .p-track { flex: 1; height: 12px; background: rgba(255,255,255,0.1); border-radius: 6px; position: relative; margin-top: 30px; }
         .p-fill { height: 100%; border-radius: 6px; transition: width 1s ease-in-out; position: absolute; }
         .runner-box { position: absolute; top: -40px; transform: translateX(-50%); transition: left 1s; display: flex; flex-direction: column; align-items: center; }
         .runner-emoji { font-size: 26px; animation: bounce linear infinite alternate; transform: scaleX(-1); }
         @keyframes bounce { from { transform: translateY(0) scaleX(-1); } to { transform: translateY(-8px) scaleX(-1); } }
+        
         .bmi-tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 8px; font-weight: bold; border: 1px solid; }
         .tag-lose { background: rgba(230, 126, 34, 0.2); color: #e67e22; border-color: #e67e22; }
         .tag-gain { background: rgba(52, 152, 219, 0.2); color: #3498db; border-color: #3498db; }
         .target-bmi-label { position: absolute; right: 0; top: -20px; font-size: 11px; color: var(--gold); opacity: 0.9; font-weight: bold; }
         .final-badge { background: var(--gold); color: #000; font-size: 10px; padding: 1px 4px; border-radius: 3px; font-weight: 900; margin-left: 5px; vertical-align: middle; }
+
+        /* --- 手機版 RWD 媒體查詢 --- */
+        @media (max-width: 850px) {
+            body { padding: 10px 0; }
+            .main-layout { flex-direction: column; align-items: center; width: 98%; }
+            .control-panel { flex: 1 1 auto; width: 100%; position: relative; top: 0; order: 1; }
+            .rank-display { width: 100%; padding: 0; order: 2; }
+            .rank-card { padding: 10px 15px; gap: 10px; }
+            .p-info { flex: 0 0 110px; }
+            .p-info div:first-child { font-size: 15px !important; }
+            .p-track { margin-top: 25px; }
+            .runner-emoji { font-size: 20px; }
+            #intro-title { font-size: 45px !important; letter-spacing: 5px !important; }
+            #updForm div[style*="display: flex"] { flex-direction: column; gap: 0 !important; }
+        }
     </style>
 </head>
 <body>
@@ -92,7 +112,7 @@
                     <span id="musicToggle">🔇</span> 
                     <span id="musicStatusText" class="sync-style-text">點擊開啟背景音樂</span>
                 </div>
-                <span style="font-size: 13px; font-weight: bold; color: #fff;">資料每 30 秒自動同步 🔄</span>
+                <span style="font-size: 13px; font-weight: bold; color: #fff;">資料自動同步 🔄</span>
             </div>
             <div id="syncTime" class="sync-style-text" style="text-align: right;">最後同步：等待中...</div>
         </div>
@@ -183,6 +203,7 @@
     function closeIntro() {
         clearTimeout(window.introTimer);
         const overlay = document.getElementById('intro-overlay');
+        if(!overlay) return;
         overlay.style.opacity = "0";
         overlay.style.transform = "scale(1.2)";
         setTimeout(() => { overlay.remove(); makeItRain(); }, 1000);
@@ -218,7 +239,7 @@
             checkFinalPhase();
             renderList();
             updateCountdown();
-            document.getElementById('syncTime').innerText = `最後同步：${new Date().toLocaleTimeString()} (30s 自動更新中)`;
+            document.getElementById('syncTime').innerText = `最後同步：${new Date().toLocaleTimeString()} (30s 自動更新)`;
             document.getElementById('periodDisplay').innerText = `期間：${period.start || '未設定'} ~ ${period.end}`;
             if(localStorage.getItem('admin_auth') === 'true') showAdminUI();
         } catch (e) { console.error("同步失敗", e); }
@@ -353,19 +374,14 @@
                 if(isNaN(fsmm) || isNaN(ffat) || !img) throw new Error("結算日：肌肉、脂肪與照片必填");
                 
                 p.csmm = fsmm; p.cfat = ffat; p.finalImg = img; p.isFinal = true;
-                
-                // 結算邏輯：肌肉增加率*200 + 脂肪減少率*100
                 const smmRate = ((fsmm - p.ssmm) / p.ssmm) * 200;
                 const fatRate = ((p.sfat - ffat) / p.sfat) * 100;
                 p.progress = Math.max(0, (smmRate + fatRate)).toFixed(1);
             } else {
-                // 平日進度：體重趨近率(60%) + 腰圍縮減率(40%)
                 const targetW = p.tbmi * ((p.h/100)*(p.h/100));
                 const initialWGap = Math.abs(p.sw - targetW);
                 const currentWGap = Math.abs(w - targetW);
                 let wScore = initialWGap === 0 ? 100 : (1 - (currentWGap / initialWGap)) * 100;
-                
-                // 腰圍每縮小 10% 為滿分
                 let waistScore = ((p.swaist - waist) / (p.swaist * 0.1)) * 100;
                 p.progress = Math.max(0, (wScore * 0.6 + waistScore * 0.4)).toFixed(1);
             }
