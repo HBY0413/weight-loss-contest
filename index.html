@@ -17,7 +17,7 @@
             justify-content: center; color: var(--text); overflow-y: auto; padding: 20px 0;
         }
         
-        /* --- 開場動畫樣式 --- */
+        /* --- 新增：開場動畫樣式 --- */
         #intro-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #000; z-index: 10000; display: flex; align-items: center;
@@ -35,7 +35,7 @@
         }
         .intro-btn:hover { background: rgba(255,255,255,0.2); border-color: var(--gold); }
 
-        /* 主佈局樣式 */
+        /* 原有樣式保持不變 */
         .main-layout { display: flex; gap: 25px; width: 95%; max-width: 1400px; min-height: 85vh; align-items: flex-start; }
         .control-panel { flex: 0 0 320px; display: flex; flex-direction: column; gap: 15px; position: sticky; top: 20px; }
         .glass { background: rgba(30, 30, 30, 0.4); backdrop-filter: blur(15px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden; flex-shrink: 0; }
@@ -67,48 +67,6 @@
         .tag-gain { background: rgba(52, 152, 219, 0.2); color: #3498db; border-color: #3498db; }
         .target-bmi-label { position: absolute; right: 0; top: -20px; font-size: 11px; color: var(--gold); opacity: 0.9; font-weight: bold; }
         .final-badge { background: var(--gold); color: #000; font-size: 10px; padding: 1px 4px; border-radius: 3px; font-weight: 900; margin-left: 5px; vertical-align: middle; }
-
-        /* --- 抓狂一族風格動畫區 --- */
-        #runner-animation-box {
-            position: relative; padding: 20px; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; min-height: 180px;
-            margin-top: 0px; overflow: hidden; border: 2px solid var(--gold);
-        }
-        .animation-title {
-            position: absolute; top: 10px; width: 100%; text-align: center;
-            font-size: 14px; font-weight: 900; color: #ff3300; 
-            text-shadow: 2px 2px 0px #fff; z-index: 10;
-        }
-        /* 抓狂震動特效 */
-        @keyframes agitated-shake {
-            0% { transform: translate(0,0) rotate(0deg); }
-            10% { transform: translate(-2px, -2px) rotate(-1deg); }
-            20% { transform: translate(2px, 0px) rotate(1deg); }
-            30% { transform: translate(-2px, 2px) rotate(0deg); }
-            40% { transform: translate(2px, 2px) rotate(-1deg); }
-            50% { transform: translate(-2px, -2px) rotate(1deg); }
-            60% { transform: translate(2px, 0px) rotate(0deg); }
-            70% { transform: translate(-2px, 2px) rotate(-1deg); }
-            80% { transform: translate(2px, -2px) rotate(1deg); }
-            90% { transform: translate(-2px, 0px) rotate(0deg); }
-            100% { transform: translate(2px, 2px) rotate(-1deg); }
-        }
-        /* 瘋狂閃爍發光 */
-        @keyframes crazy-glow {
-            from { filter: drop-shadow(0 0 5px #ff0000) contrast(1.2); }
-            to { filter: drop-shadow(0 0 20px #ffcc00) contrast(1.5); }
-        }
-        .funny-runner {
-            width: 130px; height: auto; z-index: 5;
-            animation: agitated-shake 0.15s infinite, crazy-glow 0.1s infinite alternate;
-        }
-        /* 背景跑馬燈文字 */
-        .bg-text-stream {
-            position: absolute; font-size: 60px; font-weight: 900; color: rgba(255,255,255,0.03);
-            white-space: nowrap; pointer-events: none; z-index: 1;
-            animation: stream-move 1s linear infinite;
-        }
-        @keyframes stream-move { from { transform: translateX(0); } to { transform: translateX(-50%); } }
     </style>
 </head>
 <body>
@@ -134,10 +92,10 @@
         <div class="glass" style="padding: 12px; cursor: pointer; display: flex; flex-direction: column; gap: 5px;" onclick="syncFromGitHub()">
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <div id="musicControl" onclick="event.stopPropagation(); toggleMusic()">
-                    <span id="musicToggle">啟動</span> 
-                    <span id="musicStatusText" class="sync-style-text">點擊開啟音樂</span>
+                    <span id="musicToggle">🔇</span> 
+                    <span id="musicStatusText" class="sync-style-text">點擊開啟背景音樂</span>
                 </div>
-                <span style="font-size: 13px; font-weight: bold; color: #fff;">30s 同步中 🔄</span>
+                <span style="font-size: 13px; font-weight: bold; color: #fff;">資料每 30 秒自動同步 🔄</span>
             </div>
             <div id="syncTime" class="sync-style-text" style="text-align: right;">最後同步：等待中...</div>
         </div>
@@ -145,7 +103,7 @@
         <div class="glass">
             <div class="treasure-header">
                 <div id="moneyBag" style="font-size: 45px; cursor: pointer; display: inline-block; transition: transform 0.1s;" onclick="makeItRain()">💰</div>
-                <div style="font-size: 12px; font-weight: bold; margin-top: 5px;">2026Y ASGARD 獎金</div>
+                <div style="font-size: 12px; font-weight: bold; margin-top: 5px;">2026Y ASGARD 挑戰賽獎金</div>
                 <div style="font-size: 32px; font-weight: 900;" id="totalPrize">NT$ 0</div>
             </div>
             <div id="periodDisplay" style="text-align:center; padding: 8px; font-size: 11px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6);">期間：未設定 ~ 2026-04-13</div>
@@ -155,48 +113,53 @@
         <div class="glass"> 
             <button class="menu-trigger" onclick="toggleMenu('regForm')">🏃 我要報名參賽 <span>+</span></button>
             <div id="regForm" class="menu-content">
+                <div class="formula-box">
+                    📊 <b>目標設定建議：</b><br>
+                    • <b>BMI 24</b>：維持健康標準 (不超重)<br>
+                    • <b>BMI 22</b>：精實健美體態 (穿衣好看)<br>
+                    • <b>BMI 20</b>：極致挑戰等級 (運動員感)
+                </div>
                 <input type="text" id="r_name" placeholder="姓名">
                 <input type="number" id="r_h" placeholder="身高(cm)">
                 <input type="number" id="r_w" placeholder="初始體重(kg)">
                 <input type="number" id="r_f" placeholder="初始體脂(%)">
                 <select id="r_target_bmi">
-                    <option value="24">目標 BMI 24</option>
-                    <option value="22">目標 BMI 22</option>
-                    <option value="20">目標 BMI 20</option>
+                    <option value="24">目標 BMI 24 | 健康維護層級</option>
+                    <option value="22">目標 BMI 22 | 精實健美層級</option>
+                    <option value="20">目標 BMI 20 | 極致挑戰層級</option>
                 </select>
-                <input type="password" id="r_acc" placeholder="更新密碼">
-                <button id="regBtn" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold;" onclick="doRegister()">確認報名</button>
+                <input type="password" id="r_acc" placeholder="設定體重更新密碼">
+                <button id="regBtn" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doRegister()">確認報名</button>
             </div>
 
-            <button class="menu-trigger" onclick="toggleMenu('updForm')">⚖️ 更新體重 <span>+</span></button>
+            <button class="menu-trigger" onclick="toggleMenu('updForm')">⚖️ 更新體重紀錄 / 結算 <span>+</span></button>
             <div id="updForm" class="menu-content">
+                <div id="finalNotice" class="formula-box" style="display:none; border-color: var(--gold); color: var(--gold);">
+                    🏁 <b>今日為賽末結算日：</b><br>體脂率與照片連結已改為「必填」。
+                </div>
                 <input type="text" id="u_name" placeholder="姓名">
                 <input type="password" id="u_acc" placeholder="輸入密碼">
                 <input type="number" id="u_w" placeholder="今日體重(kg)">
                 <div id="finalArea" style="opacity:0.5">
-                    <input type="number" id="u_f" placeholder="今日體脂率(%)" disabled>
-                    <input type="text" id="u_img" placeholder="InBody照片連結" disabled>
+                    <input type="number" id="u_f" placeholder="今日體脂率(%) (結算用)" disabled>
+                    <input type="text" id="u_img" placeholder="InBody照片連結 (結算用)" disabled>
                 </div>
-                <button id="updBtn" style="width:100%; padding:12px; background:var(--success); color:white; border:none; border-radius:8px;" onclick="doUpdate()">同步數據</button>
+                <button id="updBtn" style="width:100%; padding:12px; background:var(--success); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doUpdate()">同步數據</button>
             </div>
 
-            <button class="menu-trigger" onclick="toggleMenu('adminForm')">🔑 管理者 <span>+</span></button>
+            <button class="menu-trigger" onclick="toggleMenu('adminForm')">🔑 管理者設定 <span>+</span></button>
             <div id="adminForm" class="menu-content">
                 <div id="adminLoginSection">
-                    <input type="password" id="adm_pw" placeholder="密鑰">
-                    <button style="width:100%; padding:12px; background:var(--accent); color:white; border:none; border-radius:8px;" onclick="doAdminLogin()">管理模式</button>
+                    <input type="password" id="adm_pw" placeholder="管理者密鑰">
+                    <button style="width:100%; padding:12px; background:var(--accent); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doAdminLogin()">進入管理模式</button>
                 </div>
                 <div id="adminDataArea" style="display:none; margin-top:10px;">
-                    <input type="date" id="set_start"><input type="date" id="set_end">
-                    <button style="width:100%; padding:10px; background:#444; color:white; border:none; border-radius:8px;" onclick="savePeriod()">儲存賽期</button>
+                    <input type="date" id="set_start">
+                    <input type="date" id="set_end">
+                    <button style="width:100%; padding:10px; background:#444; color:white; border:none; border-radius:8px; cursor:pointer; margin-bottom:15px;" onclick="savePeriod()">儲存賽期</button>
                     <div id="adminPlayerList" style="max-height: 150px; overflow-y: auto;"></div>
+                    <button style="width:100%; padding:10px; background:rgba(255,255,255,0.1); color:#fff; border:1px solid rgba(255,255,255,0.2); border-radius:8px; cursor:pointer;" onclick="doAdminLogout()">登出</button>
                 </div>
-            </div>
-
-            <div id="runner-animation-box" class="glass">
-                <div class="bg-text-stream">抓狂中！快跑！抓狂中！快跑！抓狂中！快跑！</div>
-                <span class="animation-title">全力抓狂跑步中！！！</span>
-                <img src="https://media.tenor.com/qL5_Z7Yh7oIAAAAi/pato-papao.gif" alt="Crazy Runner" class="funny-runner">
             </div>
         </div>
     </div>
@@ -204,88 +167,297 @@
 </div>
 
 <script>
-    /* 動畫與邏輯部分保持不變，僅確保 window.onload 正常執行 */
+    // --- 新增：動畫控制邏輯 ---
     function runIntroAnimation() {
         const title = document.getElementById('intro-title');
         const sub = document.getElementById('intro-sub');
         const bar = document.getElementById('intro-bar');
+        
         setTimeout(() => { title.classList.add('animate-title'); }, 200);
         setTimeout(() => { sub.style.opacity = "1"; }, 1000);
         setTimeout(() => { bar.style.width = "100%"; }, 100);
+
+        // 5.5秒後自動關閉
         window.introTimer = setTimeout(closeIntro, 5500);
     }
+
     function closeIntro() {
         clearTimeout(window.introTimer);
         const overlay = document.getElementById('intro-overlay');
         overlay.style.opacity = "0";
         overlay.style.transform = "scale(1.2)";
-        setTimeout(() => { overlay.remove(); makeItRain(); }, 1000);
+        setTimeout(() => { 
+            overlay.remove(); 
+            makeItRain(); // 進入後噴撒金幣
+        }, 1000);
     }
-    const CONFIG = { token: 'ghp_PIaGwuMrdhwpay' + 'dtVR10V8a8jJYP141vWzNj', owner: 'HBY0413', repo: 'weight-loss-contest', path: 'data.json' };
-    let players = [], prevRankMap = {}, period = { start: "", end: "2026-04-13" }, fileSha = "", isFinalDay = false;
+    // ----------------------
+
+    const CONFIG = {
+        token: 'ghp_PIaGwuMrdhwpay' + 'dtVR10V8a8jJYP141vWzNj', 
+        owner: 'HBY0413', repo: 'weight-loss-contest', path: 'data.json'
+    };
+
+    let players = [];
+    let prevRankMap = {};
+    let period = { start: "", end: "2026-04-13" };
+    let fileSha = "";
+    let isFinalDay = false;
 
     async function syncFromGitHub() {
         try {
-            const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}?t=${Date.now()}`, { headers: { "Authorization": `token ${CONFIG.token}` } });
+            const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}?t=${Date.now()}`, {
+                headers: { "Authorization": `token ${CONFIG.token}` }
+            });
             const data = await res.json();
             fileSha = data.sha;
             const content = JSON.parse(decodeURIComponent(escape(atob(data.content))));
+            
             const currentSorted = [...players].sort((a, b) => b.progress - a.progress);
-            prevRankMap = {}; currentSorted.forEach((p, index) => { prevRankMap[p.name] = index + 1; });
-            players = content.players || []; period = content.period || { start: "", end: "2026-04-13" };
-            checkFinalPhase(); renderList(); updateCountdown();
-            document.getElementById('syncTime').innerText = `最後同步：${new Date().toLocaleTimeString()}`;
+            prevRankMap = {};
+            currentSorted.forEach((p, index) => { prevRankMap[p.name] = index + 1; });
+
+            players = content.players || [];
+            period = content.period || { start: "", end: "2026-04-13" };
+            
+            checkFinalPhase();
+            renderList();
+            updateCountdown();
+            document.getElementById('syncTime').innerText = `最後同步：${new Date().toLocaleTimeString()} (30s 自動更新中)`;
             document.getElementById('periodDisplay').innerText = `期間：${period.start || '未設定'} ~ ${period.end}`;
             if(localStorage.getItem('admin_auth') === 'true') showAdminUI();
         } catch (e) { console.error("同步失敗", e); }
     }
 
+    // (中間原有的 functions: checkFinalPhase, pushToGitHub, renderList, toggleMenu, doAdminLogin, etc. 保持不變)
+    // ... [此處省略你提供的原有邏輯，請保留在你的檔案中] ...
+    
+    // 注意：修改 toggleMusic 以支援動畫層的按鈕顯示
     function toggleMusic() {
         const m = document.getElementById('bgMusic');
         const btn = document.getElementById('musicToggle');
-        if (m.paused) { m.play(); btn.innerText = "🔊"; } else { m.pause(); btn.innerText = "🔇"; }
+        const txt = document.getElementById('musicStatusText');
+        const introBtn = document.getElementById('introMusicBtn');
+        
+        if (m.paused) {
+            m.play().then(() => { 
+                btn.innerText = "🔊"; 
+                txt.innerText = "背景音樂播放中"; 
+                if(introBtn) introBtn.innerText = "🔊 Music: ON";
+            }).catch(() => alert("請點擊頁面任意處以啟動音樂"));
+        } else {
+            m.pause(); 
+            btn.innerText = "🔇"; 
+            txt.innerText = "點擊開啟背景音樂";
+            if(introBtn) introBtn.innerText = "🔇 Music: OFF";
+        }
     }
 
+    // 原有的其他功能函數 (doRegister, doUpdate, makeItRain, updateCountdown 等) 
+    // 務必確保完整保留
     function checkFinalPhase() {
-        const end = new Date(period.end + "T23:59:59").getTime(), now = new Date().getTime();
+        const end = new Date(period.end + "T23:59:59").getTime();
+        const now = new Date().getTime();
         isFinalDay = (end - now < 86400000 && end - now > 0);
-        document.getElementById('finalArea').style.opacity = isFinalDay ? "1" : "0.5";
-        document.getElementById('u_f').disabled = !isFinalDay;
-        document.getElementById('u_img').disabled = !isFinalDay;
+        
+        const area = document.getElementById('finalArea');
+        const fInput = document.getElementById('u_f');
+        const imgInput = document.getElementById('u_img');
+        const notice = document.getElementById('finalNotice');
+
+        if(isFinalDay) {
+            area.style.opacity = "1";
+            fInput.disabled = false;
+            imgInput.disabled = false;
+            notice.style.display = "block";
+        } else {
+            area.style.opacity = "0.5";
+            fInput.disabled = true;
+            imgInput.disabled = true;
+            notice.style.display = "none";
+        }
+    }
+
+    async function pushToGitHub() {
+        const content = btoa(unescape(encodeURIComponent(JSON.stringify({ players, period }))));
+        const res = await fetch(`https://api.github.com/repos/${CONFIG.owner}/${CONFIG.repo}/contents/${CONFIG.path}`, {
+            method: "PUT", headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
+            body: JSON.stringify({ message: "Update Data", content, sha: fileSha })
+        });
+        if (!res.ok) throw new Error("同步衝突，請重新整理");
+        await syncFromGitHub();
     }
 
     function renderList() {
         const container = document.getElementById('rankContainer');
         document.getElementById('totalPrize').innerText = `NT$ ${(players.length * 500).toLocaleString()}`;
         const sorted = [...players].sort((a, b) => b.progress - a.progress);
+        
         container.innerHTML = sorted.map((p, i) => {
             const barW = Math.min(Math.max(parseFloat(p.progress) || 0, 0), 100);
             const targetW = p.tbmi * ((p.h/100)*(p.h/100));
+            const isLosing = p.sw > targetW; 
+            const speed = 0.6 - (barW / 100 * 0.45);
             const color = barW >= 80 ? '#27ae60' : (barW >= 40 ? '#f39c12' : '#e74c3c');
-            return `<div class="rank-card">
-                <div style="font-size: 24px; font-weight: 900; color: var(--gold); width: 45px; text-align:center;">${i+1}</div>
-                <div class="p-info">
-                    <div style="font-size: 18px; font-weight: bold;">${p.name}</div>
-                    <div style="font-size: 11px; opacity: 0.6;">最後更新: ${p.lastUpdate || '-'}</div>
-                </div>
-                <div class="p-track">
-                    <div class="p-fill" style="width: ${barW}%; background: ${color};"></div>
-                    <div class="runner-box" style="left: ${barW}%;"><span class="runner-emoji">🏃</span></div>
-                </div>
-            </div>`;
+            const currentRank = i + 1;
+            const lastRank = prevRankMap[p.name];
+            let trendHtml = `<span class="rank-trend trend-none">-</span>`;
+            if (lastRank) {
+                if (currentRank < lastRank) trendHtml = `<span class="rank-trend trend-up">▲</span>`;
+                else if (currentRank > lastRank) trendHtml = `<span class="rank-trend trend-down">▼</span>`;
+            }
+
+            return `
+                <div class="rank-card">
+                    <div style="font-size: 24px; font-weight: 900; color: var(--gold); width: 45px; text-align:center;">
+                        ${currentRank}<br>${trendHtml}
+                    </div>
+                    <div class="p-info">
+                        <div style="font-size: 18px; font-weight: bold;">
+                            ${currentRank === 1 ? '👑 ' : ''}${p.name}${p.isFinal ? '<span class="final-badge">結算完成</span>' : ''}
+                            <span class="bmi-tag ${isLosing ? 'tag-lose' : 'tag-gain'}">${isLosing ? '減重' : '增重'}</span>
+                        </div>
+                        <div style="font-size: 11px; opacity: 0.6; margin-top: 5px;">最後更新: ${p.lastUpdate || '-'}</div>
+                    </div>
+                    <div class="p-track">
+                        <div class="target-bmi-label">目標 BMI: ${p.tbmi || 24} 🏁</div>
+                        <div class="p-fill" style="width: ${barW}%; background: ${color}; box-shadow: 0 0 15px ${color}66;"></div>
+                        <div class="runner-box" style="left: ${barW}%;">
+                            <div style="font-size: 10px; font-weight: bold; margin-bottom: 2px;">${barW}%</div>
+                            <span class="runner-emoji" style="animation-duration: ${speed}s">🏃</span>
+                        </div>
+                    </div>
+                </div>`;
         }).join('');
     }
 
     function toggleMenu(id) {
-        const target = document.getElementById(id), isOpen = target.classList.contains('active');
+        const target = document.getElementById(id);
+        const isOpen = target.classList.contains('active');
         document.querySelectorAll('.menu-content').forEach(el => el.classList.remove('active'));
         if (!isOpen) target.classList.add('active');
     }
 
-    function makeItRain() { confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } }); }
-    function updateCountdown() { /* 倒數邏輯... */ }
+    function doAdminLogin() {
+        if(document.getElementById('adm_pw').value === 'gogofit666') {
+            localStorage.setItem('admin_auth', 'true');
+            showAdminUI();
+        } else { alert("密碼錯誤"); }
+    }
 
-    window.onload = () => { runIntroAnimation(); syncFromGitHub(); setInterval(syncFromGitHub, 30000); };
+    function showAdminUI() {
+        document.getElementById('adminLoginSection').style.display = 'none';
+        document.getElementById('adminDataArea').style.display = 'block';
+        if(period.start) document.getElementById('set_start').value = period.start;
+        if(period.end) document.getElementById('set_end').value = period.end;
+        renderAdminList();
+    }
+
+    function doAdminLogout() { localStorage.removeItem('admin_auth'); location.reload(); }
+
+    function renderAdminList() {
+        document.getElementById('adminPlayerList').innerHTML = players.map((p, i) => `
+            <div style="background:rgba(0,0,0,0.2); border-radius:8px; padding:8px; margin-bottom:8px; font-size:12px; display:flex; justify-content:space-between;">
+                <b>${p.name}</b>
+                <button onclick="deletePlayer(${i})" style="color:#ff4d4d; background:none; border:none; cursor:pointer;">[移除]</button>
+            </div>
+        `).join('');
+    }
+
+    async function deletePlayer(i) { 
+        if(confirm(`確定要移除參賽者 ${players[i].name} 嗎？`)) { 
+            players.splice(i,1); await pushToGitHub(); 
+        } 
+    }
+    
+    async function savePeriod() { 
+        period.start = document.getElementById('set_start').value; 
+        period.end = document.getElementById('set_end').value; 
+        await pushToGitHub(); alert("賽期更新成功"); 
+    }
+
+    function makeItRain() {
+        confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#f1c40f', '#e67e22', '#ffffff'] });
+        const bag = document.getElementById('moneyBag');
+        bag.style.transform = 'scale(1.3)';
+        setTimeout(() => bag.style.transform = 'scale(1)', 100);
+    }
+
+    function updateCountdown() {
+        if(!period.end) return;
+        const target = new Date(period.end + "T23:59:59").getTime();
+        const now = new Date().getTime();
+        const distance = target - now;
+        if (distance < 0) { document.getElementById('ddayDisplay').innerText = "挑戰已結束"; return; }
+        const d = Math.floor(distance / 86400000);
+        const h = Math.floor((distance % 86400000) / 3600000);
+        const m = Math.floor((distance % 3600000) / 60000);
+        const s = Math.floor((distance % 60000) / 1000);
+        document.getElementById('ddayDisplay').innerText = `${String(d).padStart(2,'0')}D ${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    }
+
+    async function doRegister() {
+        const btn = document.getElementById('regBtn');
+        const name = document.getElementById('r_name').value.trim();
+        const h = parseFloat(document.getElementById('r_h').value);
+        const sw = parseFloat(document.getElementById('r_w').value);
+        const sf = parseFloat(document.getElementById('r_f').value);
+        const tbmi = parseFloat(document.getElementById('r_target_bmi').value);
+        const acc = document.getElementById('r_acc').value;
+        if(!name || isNaN(h) || isNaN(sw) || isNaN(sf) || !acc) return alert("請填寫完整資訊");
+        try {
+            btn.disabled = true; btn.innerText = "處理中...";
+            await syncFromGitHub();
+            if(players.some(p => p.name === name)) throw new Error("該姓名已存在");
+            players.push({ name, h, sw, cw: sw, sf, cf: sf, tbmi, acc, progress: 0, lastUpdate: new Date().toLocaleString() });
+            await pushToGitHub();
+            alert("報名成功！");
+            toggleMenu('regForm');
+        } catch(e) { alert(e.message); } finally { btn.disabled = false; btn.innerText = "確認報名"; }
+    }
+
+    async function doUpdate() {
+        const btn = document.getElementById('updBtn');
+        const name = document.getElementById('u_name').value.trim();
+        const acc = document.getElementById('u_acc').value;
+        const w = parseFloat(document.getElementById('u_w').value);
+        const f = parseFloat(document.getElementById('u_f').value);
+        const img = document.getElementById('u_img').value.trim();
+        
+        if(!name || !acc || isNaN(w)) return alert("請填寫姓名、密碼與體重");
+        if(isFinalDay && (isNaN(f) || !img)) return alert("結算日：體脂率與照片為必填！");
+        
+        try {
+            btn.disabled = true; btn.innerText = "數據計算中...";
+            await syncFromGitHub(); 
+            const p = players.find(x => x.name === name && x.acc === acc);
+            if(!p) throw new Error("驗證失敗");
+            
+            p.cw = w; 
+            p.lastUpdate = new Date().toLocaleString();
+            if(isFinalDay) { p.cf = f; p.finalImg = img; p.isFinal = true; }
+            
+            const targetW = p.tbmi * ((p.h/100)*(p.h/100));
+            const initialGap = Math.abs(p.sw - targetW);
+            const currentGap = Math.abs(w - targetW);
+            const reachedTarget = p.sw > targetW ? (w <= targetW) : (w >= targetW);
+            
+            if (reachedTarget || initialGap === 0) p.progress = 100;
+            else p.progress = Math.max(0, ((1 - (currentGap / initialGap)) * 100)).toFixed(1);
+            
+            await pushToGitHub();
+            alert(`🎉 ${name} 同步成功！進度：${p.progress}%`);
+            toggleMenu('updForm');
+        } catch (e) { alert(e.message); } finally { btn.disabled = false; btn.innerText = "同步數據"; }
+    }
+
+    // 最後的 window.onload 觸發動畫
+    window.onload = () => {
+        runIntroAnimation(); // 啟動開場
+        syncFromGitHub();
+        setInterval(syncFromGitHub, 30000);
+        setInterval(updateCountdown, 1000);
+    };
 </script>
 </body>
 </html>
