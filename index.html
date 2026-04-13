@@ -49,7 +49,7 @@
         input:disabled { opacity: 0.3; cursor: not-allowed; }
         .rank-display { flex: 1; display: flex; flex-direction: column; gap: 20px; padding: 10px; }
         .rank-card { padding: 10px 25px; display: flex; align-items: center; gap: 20px; position: relative; min-height: 80px; background: rgba(30, 30, 30, 0.3) !important; backdrop-filter: blur(10px); border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
-        .p-info { flex: 0 0 180px; }
+        .p-info { flex: 0 0 220px; }
         .rank-trend { font-size: 12px; font-weight: bold; margin-left: 5px; }
         .trend-up { color: #2ecc71; }
         .trend-down { color: #e74c3c; }
@@ -64,6 +64,13 @@
         .tag-gain { background: rgba(52, 152, 219, 0.2); color: #3498db; border-color: #3498db; }
         .target-bmi-label { position: absolute; right: 0; top: -20px; font-size: 11px; color: var(--gold); opacity: 0.9; font-weight: bold; }
         .final-badge { background: var(--gold); color: #000; font-size: 10px; padding: 1px 4px; border-radius: 3px; font-weight: 900; margin-left: 5px; vertical-align: middle; }
+
+        /* 新增：結算數據樣式 */
+        .final-stat-box { display: flex; gap: 5px; margin-top: 5px; }
+        .stat-chip { font-size: 10px; padding: 2px 6px; border-radius: 4px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); color: rgba(255, 255, 255, 0.8); }
+        .stat-val { font-weight: bold; }
+        .val-pos { color: #2ecc71; } /* 增加 (綠) */
+        .val-neg { color: #e74c3c; } /* 減少 (紅) */
     </style>
 </head>
 <body>
@@ -267,10 +274,25 @@
             const color = barW >= 80 ? '#27ae60' : (barW >= 40 ? '#f39c12' : '#e74c3c');
             const currentRank = i + 1;
             const lastRank = prevRankMap[p.name];
+            
             let trendHtml = `<span class="rank-trend trend-none">-</span>`;
             if (lastRank) {
                 if (currentRank < lastRank) trendHtml = `<span class="rank-trend trend-up">▲</span>`;
                 else if (currentRank > lastRank) trendHtml = `<span class="rank-trend trend-down">▼</span>`;
+            }
+
+            // 計算肌肉與脂肪增減 (僅限前三名且結算完成者顯示)
+            let finalStatsHtml = '';
+            if (p.isFinal) {
+                const smmDiff = (p.csmm - p.ssmm).toFixed(1);
+                const fatDiff = (p.cfat - p.sfat).toFixed(1);
+                
+                finalStatsHtml = `
+                    <div class="final-stat-box">
+                        <span class="stat-chip">肌肉 <span class="stat-val ${smmDiff >= 0 ? 'val-pos' : 'val-neg'}">${smmDiff >= 0 ? '+' : ''}${smmDiff}kg</span></span>
+                        <span class="stat-chip">脂肪 <span class="stat-val ${fatDiff <= 0 ? 'val-pos' : 'val-neg'}">${fatDiff > 0 ? '+' : ''}${fatDiff}kg</span></span>
+                    </div>
+                `;
             }
 
             return `
@@ -280,16 +302,17 @@
                     </div>
                     <div class="p-info">
                         <div style="font-size: 18px; font-weight: bold;">
-                            ${currentRank === 1 ? '👑 ' : ''}${p.name}${p.isFinal ? '<span class="final-badge">結算完成</span>' : ''}
+                            ${currentRank === 1 ? '👑 ' : (currentRank === 2 ? '🥈 ' : (currentRank === 3 ? '🥉 ' : ''))}${p.name}${p.isFinal ? '<span class="final-badge">結算完成</span>' : ''}
                             <span class="bmi-tag ${isLosing ? 'tag-lose' : 'tag-gain'}">${isLosing ? '減重' : '增重'}</span>
                         </div>
+                        ${finalStatsHtml}
                         <div style="font-size: 11px; opacity: 0.6; margin-top: 5px;">最後更新: ${p.lastUpdate || '-'}</div>
                     </div>
                     <div class="p-track">
                         <div class="target-bmi-label">目標 BMI: ${p.tbmi || 24} 🏁</div>
                         <div class="p-fill" style="width: ${barW}%; background: ${color}; box-shadow: 0 0 15px ${color}66;"></div>
                         <div class="runner-box" style="left: ${barW}%;">
-                            <div style="font-size: 10px; font-weight: bold; margin-bottom: 2px;">${barW}%</div>
+                            <div style="font-size: 10px; font-weight: bold; margin-bottom: 2px;">${barW}% ${isFinalDay ? 'SCORE' : ''}</div>
                             <span class="runner-emoji" style="animation-duration: ${speed}s">🏃</span>
                         </div>
                     </div>
@@ -346,18 +369,11 @@
             p.cwaist = waist;
             p.lastUpdate = new Date().toLocaleString();
 
-            // --- 修改後的平滑加權邏輯 ---
-            
-            // 1. 基礎達成率 (體重 50% + 腰圍 50%)
             const targetW = p.tbmi * ((p.h/100)*(p.h/100));
             const wGap = Math.abs(p.sw - targetW);
             const wRate = wGap === 0 ? 1 : Math.min(1, Math.max(0, (Math.abs(p.sw - w)) / wGap));
-            
-            // 腰圍達成率 (以縮減初始腰圍的 10% 為滿分標竿)
             const waistRate = Math.min(1, Math.max(0, (p.swaist - waist) / (p.swaist * 0.1)));
             const avgRate = (wRate * 0.5) + (waistRate * 0.5);
-            
-            // 2. 基準分 (佔 80 分)
             const baselineScore = avgRate * 80;
             let finalProgress = 0;
 
@@ -369,23 +385,20 @@
                 
                 p.csmm = fsmm; p.cfat = ffat; p.finalImg = img; p.isFinal = true;
                 
-                // 真實加成 (佔 20 分): 增肌 1kg 拿 10分，減脂 1kg 拿 2分
                 const smmBonus = Math.max(0, (fsmm - p.ssmm) * 10); 
                 const fatBonus = Math.max(0, (p.sfat - ffat) * 2);
                 const realBonus = Math.min(20, smmBonus + fatBonus);
                 
                 finalProgress = baselineScore + realBonus;
             } else {
-                // 平期：模擬 20% 加成，讓進度隨體重腰圍平滑上升
                 const mockBonus = avgRate * 20;
                 finalProgress = baselineScore + mockBonus;
             }
 
             p.progress = Math.min(100, Math.max(0, finalProgress)).toFixed(1);
-            // ------------------------
             
             await pushToGitHub();
-            alert(`🎉 ${name} 更新成功！${isFinalDay ? '總結算分：' : '目前進度：'}${p.progress}%`);
+            alert(`🎉 ${name} 更新成功！${p.isFinal ? '總結算分：' : '目前進度：'}${p.progress}%`);
             toggleMenu('updForm');
         } catch (e) { alert(e.message); } finally { btn.disabled = false; btn.innerText = "同步數據"; }
     }
