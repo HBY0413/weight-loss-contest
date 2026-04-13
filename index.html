@@ -29,7 +29,7 @@
         .intro-btn {
             background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.2);
             color: white; padding: 8px 18px; border-radius: 20px; cursor: pointer;
-            backdrop-filter: blur(5px); font-size: 13px; transition: 7.8s;
+            backdrop-filter: blur(5px); font-size: 13px; transition: 5.8s;
         }
         .intro-btn:hover { background: rgba(255,255,255,0.2); border-color: var(--gold); }
 
@@ -184,7 +184,7 @@
         setTimeout(() => { title.classList.add('animate-title'); }, 200);
         setTimeout(() => { sub.style.opacity = "1"; }, 1000);
         setTimeout(() => { bar.style.width = "100%"; }, 100);
-        window.introTimer = setTimeout(closeIntro, 8000);
+        window.introTimer = setTimeout(closeIntro, 6000);
     }
 
     function closeIntro() {
