@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ASGARD 體態健康挑戰賽</title>
+    <title>ASGARD 體態健康挑戰賽 2.0</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root { --primary: #1a253a; --gold: #f1c40f; --accent: #e67e22; --text: #eee; --success: #27ae60; }
@@ -56,9 +56,7 @@
             gap: 8px;
         }
 
-        #musicControl:hover {
-            opacity: 0.8;
-        }
+        #musicControl:hover { opacity: 0.8; }
 
         .treasure-header { background: linear-gradient(135deg, #f39c12, #f1c40f); color: white; padding: 20px; text-align: center; }
         
@@ -121,6 +119,7 @@
         .tag-lose { background: rgba(230, 126, 34, 0.2); color: #e67e22; border-color: #e67e22; }
         .tag-gain { background: rgba(52, 152, 219, 0.2); color: #3498db; border-color: #3498db; }
         .target-bmi-label { position: absolute; right: 0; top: -20px; font-size: 11px; color: var(--gold); opacity: 0.9; font-weight: bold; }
+        .privacy-hint { font-size: 9px; color: #27ae60; opacity: 0.8; display: block; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -132,20 +131,18 @@
         <div class="glass" style="padding: 12px; cursor: pointer; display: flex; flex-direction: column; gap: 5px;" onclick="syncFromGitHub()">
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <div id="musicControl" onclick="event.stopPropagation(); toggleMusic()">
-                    <span id="musicToggle">🔇</span> 
+                    <span id="musicToggle">辦</span> 
                     <span id="musicStatusText" class="sync-style-text">點擊開啟背景音樂</span>
                 </div>
-                <span style="font-size: 13px; font-weight: bold; color: #fff;">資料每 30 秒自動同步 🔄</span>
+                <span style="font-size: 13px; font-weight: bold; color: #fff;">數據自動同步 🔄</span>
             </div>
-            <div id="syncTime" class="sync-style-text" style="text-align: right;">
-                最後同步：等待中...
-            </div>
+            <div id="syncTime" class="sync-style-text" style="text-align: right;">最後同步：等待中...</div>
         </div>
 
         <div class="glass">
             <div class="treasure-header">
-                <div id="moneyBag" style="font-size: 45px; cursor: pointer; display: inline-block; transition: transform 0.1s;" onclick="makeItRain()">💰</div>
-                <div style="font-size: 12px; font-weight: bold; margin-top: 5px;">2026Y ASGARD 挑戰賽獎金</div>
+                <div id="moneyBag" style="font-size: 45px; cursor: pointer; display: inline-block;" onclick="makeItRain()">💰</div>
+                <div style="font-size: 12px; font-weight: bold; margin-top: 5px;">2026 ASGARD 總獎金</div>
                 <div style="font-size: 32px; font-weight: 900;" id="totalPrize">NT$ 0</div>
             </div>
             <div id="periodDisplay" style="text-align:center; padding: 8px; font-size: 11px; background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.6);">期間：未設定 ~ 2026-04-13</div>
@@ -153,34 +150,33 @@
         </div>
 
         <div class="glass"> 
-            <button class="menu-trigger" onclick="toggleMenu('regForm')">🏃 我要報名參賽 <span>+</span></button>
+            <button class="menu-trigger" onclick="toggleMenu('regForm')">🏃 報名參賽 <span>+</span></button>
             <div id="regForm" class="menu-content">
                 <div class="formula-box">
-                    📊 <b>目標設定建議：</b><br>
-                    • <b>BMI 24</b>：維持健康標準 (不超重)<br>
-                    • <b>BMI 22</b>：精實健美體態 (穿衣好看)<br>
-                    • <b>BMI 20</b>：極致挑戰等級 (運動員感)
+                    🏆 <b>公平競賽 2.0：</b><br>
+                    進度將由<b>體重(60%)</b>與<b>腰圍(40%)</b>變動率綜合計算，保護隱私不顯示具體數字。
                 </div>
                 <input type="text" id="r_name" placeholder="姓名">
                 <input type="number" id="r_h" placeholder="身高(cm)">
-                <input type="number" id="r_w" placeholder="初始體重(kg)">
-                
+                <input type="number" id="r_sw" placeholder="初始體重(kg)">
+                <input type="number" id="r_sc" placeholder="初始腰圍(cm)">
+                <input type="number" id="r_sf" placeholder="首日體脂%(選填)">
                 <select id="r_target_bmi">
-                    <option value="24">目標 BMI 24 | 健康維護層級</option>
-                    <option value="22">目標 BMI 22 | 精實健美層級</option>
-                    <option value="20">目標 BMI 20 | 極致挑戰層級</option>
+                    <option value="24">目標 BMI 24 | 健康維護</option>
+                    <option value="22">目標 BMI 22 | 精實健美</option>
+                    <option value="20">目標 BMI 20 | 極致挑戰</option>
                 </select>
-                
-                <input type="password" id="r_acc" placeholder="設定體重更新密碼">
+                <input type="password" id="r_acc" placeholder="設定密碼">
                 <button id="regBtn" style="width:100%; padding:12px; background:var(--primary); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doRegister()">確認報名</button>
             </div>
 
-            <button class="menu-trigger" onclick="toggleMenu('updForm')">⚖️ 更新體重紀錄 <span>+</span></button>
+            <button class="menu-trigger" onclick="toggleMenu('updForm')">⚖️ 更新今日數據 <span>+</span></button>
             <div id="updForm" class="menu-content">
                 <input type="text" id="u_name" placeholder="姓名">
                 <input type="password" id="u_acc" placeholder="輸入密碼">
                 <input type="number" id="u_w" placeholder="今日體重(kg)">
-                <button id="updBtn" style="width:100%; padding:12px; background:var(--success); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doUpdate()">同步數據</button>
+                <input type="number" id="u_c" placeholder="今日腰圍(cm)">
+                <button id="updBtn" style="width:100%; padding:12px; background:var(--success); color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;" onclick="doUpdate()">加密同步數據</button>
             </div>
 
             <button class="menu-trigger" onclick="toggleMenu('adminForm')">🔑 管理者設定 <span>+</span></button>
@@ -232,7 +228,7 @@
             
             renderList();
             updateCountdown();
-            document.getElementById('syncTime').innerText = `最後同步：${new Date().toLocaleTimeString()} (30s 自動更新中)`;
+            document.getElementById('syncTime').innerText = `最後同步：${new Date().toLocaleTimeString()}`;
             document.getElementById('periodDisplay').innerText = `期間：${period.start || '未設定'} ~ ${period.end}`;
             if(localStorage.getItem('admin_auth') === 'true') renderAdminList();
         } catch (e) { console.error("同步失敗", e); }
@@ -244,7 +240,7 @@
             method: "PUT", headers: { "Authorization": `token ${CONFIG.token}`, "Content-Type": "application/json" },
             body: JSON.stringify({ message: "Update Data", content, sha: fileSha })
         });
-        if (!res.ok) throw new Error("GitHub 同步衝突，請重新整理頁面再試一次");
+        if (!res.ok) throw new Error("同步衝突，請重新整理");
         await syncFromGitHub();
     }
 
@@ -277,7 +273,7 @@
                             ${currentRank === 1 ? '👑 ' : ''}${p.name}
                             <span class="bmi-tag ${isLosing ? 'tag-lose' : 'tag-gain'}">${isLosing ? '減重' : '增重'}</span>
                         </div>
-                        <div style="font-size: 11px; opacity: 0.6; margin-top: 5px;">最後更新: ${p.lastUpdate || '-'}</div>
+                        <span class="privacy-hint">🔒 數值已加密保護</span>
                     </div>
                     <div class="p-track">
                         <div class="target-bmi-label">目標 BMI: ${p.tbmi || 24} 🏁</div>
@@ -320,15 +316,15 @@
 
     function renderAdminList() {
         document.getElementById('adminPlayerList').innerHTML = players.map((p, i) => `
-            <div style="background:rgba(0,0,0,0.2); border-radius:8px; padding:8px; margin-bottom:8px; font-size:12px; display:flex; justify-content:space-between;">
-                <b>${p.name}</b>
-                <button onclick="deletePlayer(${i})" style="color:#ff4d4d; background:none; border:none; cursor:pointer;">[移除]</button>
+            <div style="background:rgba(0,0,0,0.2); border-radius:8px; padding:8px; margin-bottom:8px; font-size:11px;">
+                <b>${p.name}</b> (W:${p.cw}/C:${p.cc || '0'})
+                <button onclick="deletePlayer(${i})" style="color:#ff4d4d; background:none; border:none; cursor:pointer; float:right;">[移除]</button>
             </div>
         `).join('');
     }
 
     async function deletePlayer(i) { 
-        if(confirm(`確定要移除參賽者 ${players[i].name} 嗎？此操作不可復原。`)) { 
+        if(confirm(`確定要移除參賽者 ${players[i].name} 嗎？`)) { 
             players.splice(i,1); 
             await pushToGitHub(); 
         } 
@@ -337,33 +333,21 @@
     async function savePeriod() { 
         period.start = document.getElementById('set_start').value; 
         period.end = document.getElementById('set_end').value; 
-        await pushToGitHub(); alert("賽期已成功更新"); 
+        await pushToGitHub(); alert("賽期已更新"); 
     }
 
     function makeItRain() {
         confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#f1c40f', '#e67e22', '#ffffff'] });
-        const bag = document.getElementById('moneyBag');
-        bag.style.transform = 'scale(1.3)';
-        setTimeout(() => bag.style.transform = 'scale(1)', 100);
     }
 
     function toggleMusic() {
         const m = document.getElementById('bgMusic');
         const btn = document.getElementById('musicToggle');
         const txt = document.getElementById('musicStatusText');
-        
         if (m.paused) {
-            m.play().then(() => {
-                btn.innerText = "🔊";
-                txt.innerText = "背景音樂播放中";
-            }).catch(e => {
-                console.log("需互動後播放");
-                alert("請先點擊頁面任意處，瀏覽器才允許播放音樂喔！");
-            });
+            m.play().then(() => { btn.innerText = "🔊"; txt.innerText = "背景音樂播放中"; }).catch(() => alert("請先點擊頁面任意處"));
         } else {
-            m.pause();
-            btn.innerText = "🔇";
-            txt.innerText = "點擊開啟背景音樂";
+            m.pause(); btn.innerText = "🔇"; txt.innerText = "點擊開啟背景音樂";
         }
     }
 
@@ -381,66 +365,51 @@
     }
 
     async function doRegister() {
-        const btn = document.getElementById('regBtn');
         const name = document.getElementById('r_name').value.trim();
         const h = parseFloat(document.getElementById('r_h').value);
-        const sw = parseFloat(document.getElementById('r_w').value);
+        const sw = parseFloat(document.getElementById('r_sw').value);
+        const sc = parseFloat(document.getElementById('r_sc').value);
+        const sf = parseFloat(document.getElementById('r_sf').value) || null;
         const tbmi = parseFloat(document.getElementById('r_target_bmi').value);
         const acc = document.getElementById('r_acc').value;
-        if(!name || isNaN(h) || isNaN(sw) || !acc) return alert("請填寫完整報名資訊");
+        if(!name || isNaN(h) || isNaN(sw) || isNaN(sc) || !acc) return alert("請填寫完整資訊(含初始腰圍)");
         try {
-            btn.disabled = true; btn.innerText = "處理中...";
             await syncFromGitHub();
-            if(players.some(p => p.name === name)) throw new Error("該姓名已存在，請使用其他名稱");
-            
-            players.push({ name, h, sw, cw: sw, tbmi, acc, progress: 0, lastUpdate: new Date().toLocaleString() });
-            
+            if(players.some(p => p.name === name)) throw new Error("姓名重複");
+            players.push({ name, h, sw, cw: sw, sc, cc: sc, start_fat: sf, end_fat: null, tbmi, acc, progress: 0, lastUpdate: new Date().toLocaleString() });
             await pushToGitHub();
             alert("報名成功！");
             toggleMenu('regForm');
         } catch(e) { alert(e.message); } 
-        finally { btn.disabled = false; btn.innerText = "確認報名"; }
     }
 
     async function doUpdate() {
-        const btn = document.getElementById('updBtn');
         const name = document.getElementById('u_name').value.trim();
         const acc = document.getElementById('u_acc').value;
         const w = parseFloat(document.getElementById('u_w').value);
-        
-        if(!name || !acc || isNaN(w)) return alert("請輸入完整的更新資訊");
-        
+        const c = parseFloat(document.getElementById('u_c').value);
+        if(!name || !acc || isNaN(w) || isNaN(c)) return alert("請輸入體重與腰圍");
         try {
-            btn.disabled = true; btn.innerText = "數據計算中...";
             await syncFromGitHub(); 
-            
             const p = players.find(x => x.name === name && x.acc === acc);
-            if(!p) throw new Error("驗證失敗：姓名或密碼不正確");
+            if(!p) throw new Error("驗證失敗");
             
-            p.cw = w; 
+            p.cw = w; p.cc = c;
             p.lastUpdate = new Date().toLocaleString();
             
-            const targetW = p.tbmi * ((p.h/100)*(p.h/100));
-            const initialGap = Math.abs(p.sw - targetW);
-            const currentGap = Math.abs(w - targetW);
-            const isLosing = p.sw > targetW; 
+            // 公平計算公式 (目標減少初始值的 5% 即為 100%)
+            const weightGoal = p.sw * 0.05;
+            const waistGoal = p.sc * 0.05;
+            const w_prog = ((p.sw - w) / weightGoal) * 60; // 體重佔 60%
+            const c_prog = ((p.sc - c) / waistGoal) * 40;  // 腰圍佔 40%
             
-            const reachedTarget = isLosing ? (w <= targetW) : (w >= targetW);
-            
-            if (reachedTarget) {
-                p.progress = 100;
-            } else if (initialGap === 0) {
-                p.progress = 100;
-            } else {
-                let calcProgress = ((1 - (currentGap / initialGap)) * 100);
-                p.progress = Math.max(0, calcProgress).toFixed(1);
-            }
+            p.progress = Math.max(0, (w_prog + c_prog)).toFixed(1);
             
             await pushToGitHub();
-            alert(`🎉 ${name} 的數據同步成功！\n目前達成率：${p.progress}%`);
+            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            alert(`同步成功！目前戰力：${p.progress}%`);
             toggleMenu('updForm');
         } catch (e) { alert(e.message); }
-        finally { btn.disabled = false; btn.innerText = "同步數據"; }
     }
 
     window.onload = () => {
@@ -450,6 +419,5 @@
         if(localStorage.getItem('admin_auth') === 'true') showAdminUI();
     };
 </script>
-
 </body>
 </html>
